@@ -48,7 +48,7 @@ export default function ProductDetail() {
   const productReviews = reviews.filter((r) => product.name.toLowerCase().includes(r.product.toLowerCase().split(' ')[0]))
 
   return (
-    <PageWrap className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+    <PageWrap className="mx-auto max-w-7xl px-6 py-10">
       {/* breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-8 flex items-center gap-1.5 text-sm text-plum-800/60">
         <Link to="/" className="hover:text-blush-600">Home</Link>
@@ -58,7 +58,7 @@ export default function ProductDetail() {
         <span className="font-bold text-plum-900">{product.name}</span>
       </nav>
 
-      <div className="grid gap-12 lg:grid-cols-2">
+      <div className="grid grid-cols-2 gap-12">
         {/* visual */}
         <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.45 }}>
           <div className="relative">
@@ -82,7 +82,7 @@ export default function ProductDetail() {
         {/* info */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.08 }}>
           <p className="text-sm font-bold uppercase tracking-widest text-blush-500">{product.category}</p>
-          <h1 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">{product.name}</h1>
+          <h1 className="mt-2 font-display text-4xl text-plum-900">{product.name}</h1>
           <p className="mt-2 text-lg text-plum-800/70">{product.tagline}</p>
 
           <div className="mt-4 flex items-center gap-3">
@@ -100,7 +100,7 @@ export default function ProductDetail() {
           <p className="mt-6 leading-relaxed text-plum-800/80">{product.description}</p>
 
           {/* benefits */}
-          <ul className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <ul className="mt-6 grid grid-cols-2 gap-2">
             {product.benefits.map((b) => (
               <li key={b} className="flex items-center gap-2 text-sm font-semibold text-plum-900">
                 <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blush-100 text-blush-600">
@@ -134,7 +134,7 @@ export default function ProductDetail() {
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => addToCart(product.id, qty)}
-                className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-plum-900 px-8 py-4 text-sm font-bold text-white shadow-lift transition-colors duration-200 hover:bg-blush-600 sm:flex-none"
+                className="inline-flex flex-none cursor-pointer items-center justify-center gap-2 rounded-full bg-plum-900 px-8 py-4 text-sm font-bold text-white shadow-lift transition-colors duration-200 hover:bg-blush-600"
               >
                 <ShoppingBag size={17} /> Add to bag · {formatINR(product.price * qty)}
               </motion.button>
@@ -153,7 +153,7 @@ export default function ProductDetail() {
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => addToCart(product.id, qty)}
-                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-lav-500 px-8 py-4 text-sm font-bold text-white shadow-lift transition-colors duration-200 hover:bg-lav-600 sm:w-auto"
+                className="inline-flex w-auto cursor-pointer items-center justify-center gap-2 rounded-full bg-lav-500 px-8 py-4 text-sm font-bold text-white shadow-lift transition-colors duration-200 hover:bg-lav-600"
               >
                 <Bell size={17} /> Pre-order now · ships next week
               </motion.button>
@@ -197,7 +197,7 @@ export default function ProductDetail() {
       {productReviews.length > 0 && (
         <section className="mt-20">
           <h2 className="mb-8 font-display text-2xl text-plum-900">What women say about this</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-3 gap-6">
             {productReviews.map((r) => (
               <figure key={r.name} className="rounded-3xl bg-white p-6 shadow-soft">
                 <Stars rating={r.rating} />
@@ -220,7 +220,7 @@ export default function ProductDetail() {
       {/* related */}
       <section className="mt-20">
         <h2 className="mb-8 font-display text-2xl text-plum-900">You might also love</h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-4 gap-6">
           {fallbackRelated.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}

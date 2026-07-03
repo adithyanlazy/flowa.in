@@ -38,7 +38,7 @@ export default function OrderSuccess() {
   if (!lastOrder) return null
 
   return (
-    <PageWrap className="relative mx-auto max-w-2xl px-4 py-16 text-center sm:px-6">
+    <PageWrap className="relative mx-auto max-w-2xl px-6 py-16 text-center">
       <Confetti />
       <motion.div
         initial={{ scale: 0.4, opacity: 0 }}
@@ -49,13 +49,13 @@ export default function OrderSuccess() {
         <CheckCircle2 size={48} className="text-emerald-600" />
       </motion.div>
 
-      <h1 className="mt-8 font-display text-3xl text-plum-900 sm:text-4xl">Order placed with love 🎀</h1>
+      <h1 className="mt-8 font-display text-4xl text-plum-900">Order placed with love 🎀</h1>
       <p className="mx-auto mt-3 max-w-md text-plum-800/70">
         Thank you, {lastOrder.customer.name.split(' ')[0]}! Your care package is being packed and will reach{' '}
         {lastOrder.customer.city} soon.
       </p>
 
-      <div className="mt-10 rounded-3xl bg-white p-6 text-left shadow-soft sm:p-8">
+      <div className="mt-10 rounded-3xl bg-white p-8 text-left shadow-soft">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-blush-100 pb-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-plum-800/50">Order ID</p>
@@ -77,7 +77,7 @@ export default function OrderSuccess() {
           <span className="font-bold text-plum-900">To pay on delivery</span>
           <span className="font-display text-xl text-plum-900">{formatINR(lastOrder.total)}</span>
         </div>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 grid grid-cols-2 gap-3">
           <div className="flex items-center gap-3 rounded-2xl bg-blush-50 p-4 text-sm">
             <Package size={20} className="shrink-0 text-blush-500" />
             <span className="text-plum-800/80">Packed discreetly within 24 hours</span>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function getViewportWidth() {
   // documentElement.clientWidth is more reliable than window.innerWidth in
@@ -7,12 +7,15 @@ function getViewportWidth() {
   return (typeof document !== 'undefined' && document.documentElement.clientWidth) || (typeof window !== 'undefined' && window.innerWidth) || 0
 }
 
-// Renders children at a fixed desktop width, then scales the whole block down
-// to fit narrow viewports — so phones see a shrunk clone of the desktop layout
-// instead of the normal responsive (stacked) mobile arrangement. No-ops at
-// desktop widths so the existing full-bleed desktop layout is untouched.
-export default function DesktopClone({ children, width = 1280 }) {
-  const innerRef = useRef(null)
+// Renders children at a fixed desktop width, then shrinks the whole block down
+// to fit narrow viewports via CSS `zoom` — so phones see a shrunk clone of the
+// desktop layout instead of the normal responsive (stacked) mobile arrangement.
+// No-ops at desktop widths so the existing full-bleed desktop layout is
+// untouched. Uses `zoom` rather than `transform: scale` because `transform`
+// creates a new containing block that breaks `position: sticky`/`fixed`
+// descendants (e.g. the sticky navbar) — `zoom` resizes layout directly
+// without that side effect.
+export default function DesktopClone({ children, width = 1280, disabled = false }) {
   const [narrow, setNarrow] = useState(() => {
     const vw = getViewportWidth()
     return vw > 0 && vw < width
@@ -21,9 +24,7 @@ export default function DesktopClone({ children, width = 1280 }) {
     const vw = getViewportWidth()
     return vw > 0 ? vw / width : 1
   })
-  const [height, setHeight] = useState(null)
 
-  // Track viewport width regardless of whether the wrapper is mounted.
   useEffect(() => {
     const update = () => {
       const vw = getViewportWidth()
@@ -41,25 +42,7 @@ export default function DesktopClone({ children, width = 1280 }) {
     }
   }, [width])
 
-  // Only runs once the wrapper (and innerRef) actually exists in the DOM,
-  // so it never misses attaching because of a same-tick ref race.
-  useEffect(() => {
-    if (!narrow || !innerRef.current) return
-    const el = innerRef.current
-    const updateHeight = () => setHeight(el.scrollHeight * scale)
-    updateHeight()
-    const ro = new ResizeObserver(updateHeight)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [narrow, scale])
+  if (disabled || !narrow) return <>{children}</>
 
-  if (!narrow) return <>{children}</>
-
-  return (
-    <div style={{ width: '100%', overflow: 'hidden', height: height ?? undefined }}>
-      <div ref={innerRef} style={{ width, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-        {children}
-      </div>
-    </div>
-  )
+  return <div style={{ width, zoom: scale }}>{children}</div>
 }

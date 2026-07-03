@@ -88,20 +88,20 @@ export default function Checkout() {
   }
 
   return (
-    <PageWrap className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <h1 className="font-display text-3xl text-plum-900 sm:text-4xl">Checkout</h1>
+    <PageWrap className="mx-auto max-w-6xl px-6 py-12">
+      <h1 className="font-display text-4xl text-plum-900">Checkout</h1>
       <p className="mt-2 flex items-center gap-1.5 text-sm text-plum-800/60">
         <Lock size={13} /> Your details are used only for this delivery.
       </p>
 
-      <form onSubmit={placeOrder} noValidate className="mt-10 grid items-start gap-10 lg:grid-cols-[1.5fr_1fr]">
+      <form onSubmit={placeOrder} noValidate className="mt-10 grid grid-cols-[1.5fr_1fr] items-start gap-10">
         {/* address */}
         <div className="space-y-8">
-          <section className="rounded-3xl bg-white p-6 shadow-soft sm:p-8">
+          <section className="rounded-3xl bg-white p-8 shadow-soft">
             <h2 className="font-display text-xl text-plum-900">Delivery address</h2>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2">
+            <div className="mt-6 grid grid-cols-2 gap-5">
               {fields.map((f) => (
-                <div key={f.id} className={f.span === 2 ? 'sm:col-span-2' : ''}>
+                <div key={f.id} className={f.span === 2 ? 'col-span-2' : ''}>
                   <label htmlFor={f.id} className="mb-1.5 block text-sm font-bold text-plum-900">
                     {f.label} <span className="text-blush-500">*</span>
                   </label>
@@ -124,7 +124,7 @@ export default function Checkout() {
                   )}
                 </div>
               ))}
-              <div className="sm:col-span-2">
+              <div className="col-span-2">
                 <label htmlFor="note" className="mb-1.5 block text-sm font-bold text-plum-900">
                   Delivery note <span className="font-normal text-plum-800/50">(optional)</span>
                 </label>
@@ -141,7 +141,7 @@ export default function Checkout() {
           </section>
 
           {/* payment */}
-          <section className="rounded-3xl bg-white p-6 shadow-soft sm:p-8">
+          <section className="rounded-3xl bg-white p-8 shadow-soft">
             <h2 className="font-display text-xl text-plum-900">Payment method</h2>
             <div className="mt-6 space-y-3">
               <label className="flex cursor-pointer items-center gap-4 rounded-2xl border-2 border-blush-400 bg-blush-50 p-5">
@@ -172,7 +172,7 @@ export default function Checkout() {
         </div>
 
         {/* summary */}
-        <aside className="rounded-3xl bg-white p-6 shadow-soft sm:p-8 lg:sticky lg:top-28">
+        <aside className="sticky top-28 rounded-3xl bg-white p-8 shadow-soft">
           <h2 className="font-display text-xl text-plum-900">Order summary</h2>
           <ul className="mt-5 space-y-4">
             {items.map(({ product, qty }) => (

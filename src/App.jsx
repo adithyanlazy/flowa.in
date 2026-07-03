@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
+import DesktopClone from './components/DesktopClone.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
 import SearchModal from './components/SearchModal.jsx'
 import Toast from './components/Toast.jsx'
@@ -27,29 +28,40 @@ function ScrollToTop() {
 
 export default function App() {
   const location = useLocation()
+  const isAdmin = location.pathname === '/admin'
+
+  const routes = (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Home />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/faq" element={<Faq />} />
+        <Route path="/policy/:type" element={<Policy />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<Home />} />
+      </Routes>
+    </AnimatePresence>
+  )
+
   return (
     <div className="flex min-h-dvh flex-col">
       <ScrollToTop />
-      <Navbar />
-      <main className="flex-1">
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/order-success" element={<OrderSuccess />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<Faq />} />
-            <Route path="/policy/:type" element={<Policy />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="*" element={<Home />} />
-          </Routes>
-        </AnimatePresence>
-      </main>
-      <Footer />
+      {/* Admin keeps the regular responsive nav/footer (own layout, not part of
+          the desktop-clone customer site) — everything else renders at desktop
+          breakpoints and is scaled down to fit narrow viewports. */}
+      <DesktopClone disabled={isAdmin}>
+        <div className="flex min-h-dvh flex-col">
+          <Navbar desktopOnly={!isAdmin} />
+          <main className="flex-1">{routes}</main>
+          <Footer desktopOnly={!isAdmin} />
+        </div>
+      </DesktopClone>
       <CartDrawer />
       <SearchModal />
       <Toast />

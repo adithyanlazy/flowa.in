@@ -15,7 +15,6 @@ import {
   Truck,
 } from 'lucide-react'
 import PageWrap from '../components/PageWrap.jsx'
-import DesktopClone from '../components/DesktopClone.jsx'
 import ProductCard from '../components/ProductCard.jsx'
 import ProductVisual from '../components/ProductVisual.jsx'
 import Stars from '../components/Stars.jsx'
@@ -391,17 +390,15 @@ function FinalCta() {
 
 export default function Home() {
   return (
-    <DesktopClone>
-      <PageWrap>
-        <Hero />
-        <Marquee />
-        <Featured />
-        <InsideTheKit />
-        <HowItWorks />
-        <Testimonials />
-        <FaqPreview />
-        <FinalCta />
-      </PageWrap>
-    </DesktopClone>
+    <PageWrap>
+      <Hero />
+      <Marquee />
+      <Featured />
+      <InsideTheKit />
+      <HowItWorks />
+      <Testimonials />
+      <FaqPreview />
+      <FinalCta />
+    </PageWrap>
   )
 }

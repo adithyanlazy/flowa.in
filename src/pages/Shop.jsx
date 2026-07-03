@@ -34,10 +34,10 @@ export default function Shop() {
   }, [products, cat, sort])
 
   return (
-    <PageWrap className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+    <PageWrap className="mx-auto max-w-7xl px-6 py-12">
       <div className="mb-10">
         <p className="text-sm font-bold uppercase tracking-widest text-blush-500">The Flowa shop</p>
-        <h1 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">Care for every kind of day</h1>
+        <h1 className="mt-2 font-display text-4xl text-plum-900">Care for every kind of day</h1>
         <p className="mt-3 max-w-lg text-plum-800/70">
           Every product ships free in a discreet box, with pay-on-delivery across India.
         </p>
@@ -77,7 +77,7 @@ export default function Shop() {
         </label>
       </div>
 
-      <motion.div layout className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <motion.div layout className="grid grid-cols-4 gap-6">
         {list.map((p, i) => (
           <ProductCard key={p.id} product={p} index={i} />
         ))}

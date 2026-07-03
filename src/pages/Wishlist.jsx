@@ -11,10 +11,10 @@ export default function Wishlist() {
   const list = products.filter((p) => wishlist.includes(p.id))
 
   return (
-    <PageWrap className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+    <PageWrap className="mx-auto max-w-7xl px-6 py-12">
       <div className="mb-10">
         <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Saved with love</p>
-        <h1 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">Your wishlist</h1>
+        <h1 className="mt-2 font-display text-4xl text-plum-900">Your wishlist</h1>
       </div>
 
       {list.length === 0 ? (
@@ -32,7 +32,7 @@ export default function Wishlist() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-4 gap-6">
           {list.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}

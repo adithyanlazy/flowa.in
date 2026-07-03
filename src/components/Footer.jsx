@@ -34,12 +34,12 @@ const cols = [
   },
 ]
 
-export default function Footer() {
+export default function Footer({ desktopOnly = false }) {
   const { content } = useAdmin()
   return (
     <footer className="mt-24 bg-plum-900 text-blush-100">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <div className={`mx-auto max-w-7xl py-14 ${desktopOnly ? 'px-6' : 'px-4 sm:px-6'}`}>
+        <div className={`grid gap-10 ${desktopOnly ? 'grid-cols-[1.4fr_1fr_1fr_1fr]' : 'md:grid-cols-[1.4fr_1fr_1fr_1fr]'}`}>
           <div>
             <div className="flex items-center gap-2">
               <LogoMark className="h-9 w-9" />
@@ -91,7 +91,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-blush-100/50 sm:flex-row">
+        <div className={`mt-12 flex items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-blush-100/50 ${desktopOnly ? 'flex-row' : 'flex-col sm:flex-row'}`}>
           <p>© {new Date().getFullYear()} Flowa. Made with care in India.</p>
           <div className="flex items-center gap-4">
             <a href={`tel:${content.contactPhone.replace(/\s/g, '')}`} className="flex items-center gap-1.5 transition-colors hover:text-white">

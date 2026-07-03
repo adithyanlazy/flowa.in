@@ -54,9 +54,9 @@ export default function Policy() {
   }
 
   return (
-    <PageWrap className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    <PageWrap className="mx-auto max-w-3xl px-6 py-14">
       <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Flowa policies</p>
-      <h1 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">{policy.title}</h1>
+      <h1 className="mt-2 font-display text-4xl text-plum-900">{policy.title}</h1>
       <div className="mt-10 space-y-6">
         {policy.sections.map(([heading, body]) => (
           <section key={heading} className="rounded-3xl bg-white p-7 shadow-soft">

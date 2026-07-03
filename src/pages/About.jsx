@@ -38,7 +38,7 @@ export default function About() {
           <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-lav-200/50 blur-3xl" />
           <div className="absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-blush-200/50 blur-3xl" />
         </div>
-        <div className="relative mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
+        <div className="relative mx-auto max-w-3xl px-6 py-20 text-center">
           <motion.div
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -48,14 +48,14 @@ export default function About() {
             <img
               src="/images/about-story.jpg"
               alt="Hands wrapping a Flowa gift box with a ribbon"
-              className="mx-auto aspect-square w-40 rounded-[2rem] object-cover shadow-soft sm:w-56"
+              className="mx-auto aspect-square w-56 rounded-[2rem] object-cover shadow-soft"
             />
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="font-display text-4xl leading-tight text-plum-900 sm:text-5xl"
+            className="font-display text-5xl leading-tight text-plum-900"
           >
             {content.aboutTitle}
           </motion.h1>
@@ -70,8 +70,8 @@ export default function About() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 sm:px-6">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <section className="mx-auto max-w-5xl px-6">
+        <div className="grid grid-cols-4 gap-4">
           {stats.map((s, i) => (
             <motion.div
               key={s.label}
@@ -88,8 +88,8 @@ export default function About() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-20 sm:px-6">
-        <div className="grid gap-6 md:grid-cols-3">
+      <section className="mx-auto max-w-5xl px-6 py-20">
+        <div className="grid grid-cols-3 gap-6">
           {values.map((v, i) => (
             <motion.div
               key={v.title}

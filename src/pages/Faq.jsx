@@ -7,11 +7,11 @@ import { useAdmin } from '../context/AdminContext.jsx'
 export default function Faq() {
   const { faqs, content } = useAdmin()
   return (
-    <PageWrap className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    <PageWrap className="mx-auto max-w-3xl px-6 py-14">
       <div className="mb-10 text-center">
         <SceneArt name="help" className="mx-auto mb-6 aspect-square w-36 rounded-[2rem] shadow-soft" />
         <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Help centre</p>
-        <h1 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">Frequently asked questions</h1>
+        <h1 className="mt-2 font-display text-4xl text-plum-900">Frequently asked questions</h1>
       </div>
       <Accordion items={faqs} />
       <div className="mt-12 rounded-3xl bg-white p-8 text-center shadow-soft">
