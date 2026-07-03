@@ -136,7 +136,7 @@ function Hero() {
             className="relative"
           >
             <Link to={`/product/${featured.id}`} className="block overflow-hidden rounded-[2.5rem] shadow-lift">
-              <img src={content.heroImage} alt="Flowa cotton pads and chocolate, flat lay" className="aspect-[5/4] w-full object-cover" />
+              <img src={content.heroImage} alt="Flowa cotton pads and chocolate, flat lay" className="aspect-square w-full object-cover" />
             </Link>
             <motion.div
               animate={{ y: [0, -10, 0] }}
@@ -202,9 +202,11 @@ function Featured() {
           <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
         </Link>
       </motion.div>
-      <div className="grid grid-cols-4 gap-6">
+      <div className="-mx-6 flex gap-5 overflow-x-auto px-6 pb-2 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0">
         {featured.map((p, i) => (
-          <ProductCard key={p.id} product={p} index={i} />
+          <div key={p.id} className="w-80 shrink-0 lg:w-auto">
+            <ProductCard product={p} index={i} />
+          </div>
         ))}
       </div>
     </section>
