@@ -49,7 +49,7 @@ export default function Navbar({ desktopOnly = false }) {
           scrolled ? 'bg-cream/85 shadow-soft backdrop-blur-xl' : 'bg-cream/60 backdrop-blur-sm'
         }`}
       >
-        <nav className={`mx-auto flex max-w-7xl items-center justify-between py-3 ${desktopOnly ? 'gap-2 px-4' : 'gap-4 px-4 sm:px-6'}`}>
+        <nav className={`mx-auto flex max-w-7xl items-center justify-between gap-4 py-3 ${desktopOnly ? 'px-6' : 'px-4 sm:px-6'}`}>
           <Logo />
 
           <ul className={`items-center gap-1 ${desktopOnly ? 'flex' : 'hidden md:flex'}`}>
@@ -58,7 +58,7 @@ export default function Navbar({ desktopOnly = false }) {
                 <NavLink
                   to={l.to}
                   className={({ isActive }) =>
-                    `rounded-full text-sm font-bold transition-colors duration-200 ${desktopOnly ? 'px-3 py-2' : 'px-4 py-2'} ${
+                    `rounded-full px-4 py-2 text-sm font-bold transition-colors duration-200 ${
                       isActive ? 'bg-blush-100 text-blush-700' : 'text-plum-800 hover:bg-blush-50 hover:text-blush-600'
                     }`
                   }
@@ -73,14 +73,14 @@ export default function Navbar({ desktopOnly = false }) {
             <button
               onClick={() => setSearchOpen(true)}
               aria-label="Search products"
-              className={`grid cursor-pointer place-items-center rounded-full text-plum-800 transition-colors hover:bg-blush-100 ${desktopOnly ? 'h-10 w-10' : 'h-11 w-11'}`}
+              className="grid h-11 w-11 cursor-pointer place-items-center rounded-full text-plum-800 transition-colors hover:bg-blush-100"
             >
               <Search size={20} />
             </button>
             <Link
               to="/wishlist"
               aria-label={`Wishlist, ${wishlist.length} items`}
-              className={`relative grid place-items-center rounded-full text-plum-800 transition-colors hover:bg-blush-100 ${desktopOnly ? 'h-10 w-10' : 'h-11 w-11'}`}
+              className="relative grid h-11 w-11 place-items-center rounded-full text-plum-800 transition-colors hover:bg-blush-100"
             >
               <Heart size={20} />
               {wishlist.length > 0 && (
@@ -92,7 +92,7 @@ export default function Navbar({ desktopOnly = false }) {
             <button
               onClick={() => setCartOpen(true)}
               aria-label={`Open cart, ${cartCount} items`}
-              className={`relative grid cursor-pointer place-items-center rounded-full text-plum-800 transition-colors hover:bg-blush-100 ${desktopOnly ? 'h-10 w-10' : 'h-11 w-11'}`}
+              className="relative grid h-11 w-11 cursor-pointer place-items-center rounded-full text-plum-800 transition-colors hover:bg-blush-100"
             >
               <ShoppingBag size={20} />
               <AnimatePresence>
