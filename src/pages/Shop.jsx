@@ -77,7 +77,7 @@ export default function Shop() {
         </label>
       </div>
 
-      <motion.div layout className="grid grid-cols-4 gap-6">
+      <motion.div layout className="grid grid-cols-2 gap-6 lg:grid-cols-4">
         {list.map((p, i) => (
           <ProductCard key={p.id} product={p} index={i} />
         ))}

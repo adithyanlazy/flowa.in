@@ -197,7 +197,7 @@ export default function ProductDetail() {
       {productReviews.length > 0 && (
         <section className="mt-20">
           <h2 className="mb-8 font-display text-2xl text-plum-900">What women say about this</h2>
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {productReviews.map((r) => (
               <figure key={r.name} className="rounded-3xl bg-white p-6 shadow-soft">
                 <Stars rating={r.rating} />
@@ -220,9 +220,11 @@ export default function ProductDetail() {
       {/* related */}
       <section className="mt-20">
         <h2 className="mb-8 font-display text-2xl text-plum-900">You might also love</h2>
-        <div className="grid grid-cols-4 gap-6">
+        <div className="-mx-6 flex gap-5 overflow-x-auto px-6 pb-2 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0">
           {fallbackRelated.map((p, i) => (
-            <ProductCard key={p.id} product={p} index={i} />
+            <div key={p.id} className="w-80 shrink-0 lg:w-auto">
+              <ProductCard product={p} index={i} />
+            </div>
           ))}
         </div>
       </section>

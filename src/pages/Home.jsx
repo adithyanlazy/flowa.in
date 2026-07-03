@@ -267,7 +267,7 @@ function HowItWorks() {
         <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Simple by design</p>
         <h2 className="mt-2 font-display text-4xl text-plum-900">How Flowa works</h2>
       </motion.div>
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {steps.map((s, i) => (
           <motion.div
             key={s.title}
@@ -299,7 +299,7 @@ function Testimonials() {
           <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Genuine stories</p>
           <h2 className="mt-2 font-display text-4xl text-plum-900">Remarkable relief, in their words</h2>
         </motion.div>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {reviews.map((r, i) => (
             <motion.figure
               key={r.name}

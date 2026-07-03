@@ -55,7 +55,7 @@ export default function App() {
       {/* Admin keeps the regular responsive nav/footer (own layout, not part of
           the desktop-clone customer site) — everything else renders at desktop
           breakpoints and is scaled down to fit narrow viewports. */}
-      <DesktopClone disabled={isAdmin} width={760}>
+      <DesktopClone disabled={isAdmin} width={550}>
         <div className="flex min-h-dvh flex-col">
           <Navbar desktopOnly={!isAdmin} />
           <main className="flex-1">{routes}</main>
