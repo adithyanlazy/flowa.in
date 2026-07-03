@@ -22,12 +22,36 @@ const fields = [
   { key: 'contactEmail', label: 'Contact email', type: 'text' },
 ]
 
+// localStorage caps out around 5-10MB per origin, shared across every admin key —
+// a raw multi-MB photo as base64 can single-handedly blow that budget and make
+// every *other* save silently fail too. Downscale + re-encode so it stays tiny.
+function compressImage(file, maxWidth = 1600, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      const scale = Math.min(1, maxWidth / img.width)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+      URL.revokeObjectURL(url)
+      resolve(canvas.toDataURL('image/jpeg', quality))
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Could not load image'))
+    }
+    img.src = url
+  })
+}
+
 function HeroImageEditor() {
   const { content, setSiteContent } = useAdmin()
   const fileRef = useRef(null)
   const [error, setError] = useState('')
 
-  const handleFile = (e) => {
+  const handleFile = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) {
@@ -39,9 +63,12 @@ function HeroImageEditor() {
       return
     }
     setError('')
-    const reader = new FileReader()
-    reader.onload = () => setSiteContent({ heroImage: reader.result })
-    reader.readAsDataURL(file)
+    try {
+      const dataUrl = await compressImage(file)
+      setSiteContent({ heroImage: dataUrl })
+    } catch {
+      setError('Could not process that image — try a different file')
+    }
     e.target.value = ''
   }
 

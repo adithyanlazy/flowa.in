@@ -19,12 +19,13 @@ function fromLines(text) {
   return text.split('\n').map((l) => l.trim()).filter(Boolean)
 }
 
-export default function ProductForm({ initial, onSave, onCancel }) {
+export default function ProductForm({ initial, categories = [], onSave, onCancel }) {
+  const [addingCategory, setAddingCategory] = useState(false)
   const [form, setForm] = useState(() => ({
     id: initial?.id || '',
     name: initial?.name || '',
     tagline: initial?.tagline || '',
-    category: initial?.category || 'Kits',
+    category: initial?.category || categories[0] || 'Kits',
     price: initial?.price ?? 0,
     mrp: initial?.mrp ?? 0,
     rating: initial?.rating ?? 4.8,
@@ -78,7 +79,31 @@ export default function ProductForm({ initial, onSave, onCancel }) {
         </div>
         <div>
           <label className={labelClass}>Category</label>
-          <input className={inputClass} value={form.category} onChange={(e) => set('category', e.target.value)} />
+          {addingCategory || categories.length === 0 ? (
+            <input
+              className={inputClass}
+              value={form.category}
+              onChange={(e) => set('category', e.target.value)}
+              placeholder="New category name"
+              autoFocus
+            />
+          ) : (
+            <select className={inputClass} value={form.category} onChange={(e) => set('category', e.target.value)}>
+              {!categories.includes(form.category) && <option value={form.category}>{form.category}</option>}
+              {categories.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          )}
+          {categories.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setAddingCategory((v) => !v)}
+              className="mt-1 cursor-pointer text-xs font-bold text-blush-600 hover:text-blush-700"
+            >
+              {addingCategory ? 'Choose existing category' : '+ Add new category'}
+            </button>
+          )}
         </div>
       </div>
 

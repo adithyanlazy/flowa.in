@@ -1,13 +1,20 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { useAdmin } from '../../context/AdminContext.jsx'
 import { formatINR } from '../../data/products.js'
 import ProductForm from './ProductForm.jsx'
 
+const baseCategories = ['Kits', 'Combos', 'Essentials', 'Gifting']
+
 export default function ProductsTab() {
   const { products, baseProducts, hiddenIds, updateProduct, addProduct, deleteProduct, restoreProduct } = useAdmin()
   const [editingId, setEditingId] = useState(null)
   const [adding, setAdding] = useState(false)
+
+  const categories = useMemo(() => {
+    const extra = [...new Set(products.map((p) => p.category))].filter((c) => !baseCategories.includes(c))
+    return [...baseCategories, ...extra]
+  }, [products])
 
   const hiddenBase = baseProducts.filter((p) => hiddenIds.includes(p.id))
 
@@ -24,6 +31,7 @@ export default function ProductsTab() {
 
       {adding && (
         <ProductForm
+          categories={categories}
           onSave={(patch) => {
             addProduct(patch)
             setAdding(false)
@@ -38,6 +46,7 @@ export default function ProductsTab() {
             {editingId === p.id ? (
               <ProductForm
                 initial={p}
+                categories={categories}
                 onSave={(patch) => {
                   updateProduct(p.id, patch)
                   setEditingId(null)

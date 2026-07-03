@@ -54,8 +54,8 @@ function load(key, fallback) {
 function save(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value))
-  } catch {
-    /* storage unavailable */
+  } catch (err) {
+    console.error(`Flowa admin: failed to save "${key}" to localStorage`, err)
   }
 }
 
