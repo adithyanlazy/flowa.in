@@ -42,7 +42,7 @@ export default function ProductDetail() {
   }
 
   const wished = wishlist.includes(product.id)
-  const off = Math.round(((product.mrp - product.price) / product.mrp) * 100)
+  const off = product.mrp > product.price ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0
   const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4)
   const fallbackRelated = related.length ? related : products.filter((p) => p.id !== product.id).slice(0, 4)
   const productReviews = reviews.filter((r) => product.name.toLowerCase().includes(r.product.toLowerCase().split(' ')[0]))
@@ -92,8 +92,8 @@ export default function ProductDetail() {
 
           <div className="mt-6 flex items-baseline gap-3">
             <span className="font-display text-4xl text-plum-900">{formatINR(product.price)}</span>
-            <span className="text-lg text-plum-800/50 line-through">{formatINR(product.mrp)}</span>
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-bold text-emerald-700">{off}% off</span>
+            {off > 0 && <span className="text-lg text-plum-800/50 line-through">{formatINR(product.mrp)}</span>}
+            {off > 0 && <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-bold text-emerald-700">{off}% off</span>}
           </div>
           <p className="mt-1 text-sm text-plum-800/60">Inclusive of all taxes · Free delivery · Pay on delivery</p>
 

@@ -13,7 +13,7 @@ export default function CartDrawer() {
 
   const items = cart.map((i) => ({ ...i, product: getProduct(i.id) })).filter((i) => i.product)
   const subtotal = items.reduce((s, i) => s + i.product.price * i.qty, 0)
-  const savings = items.reduce((s, i) => s + (i.product.mrp - i.product.price) * i.qty, 0)
+  const savings = items.reduce((s, i) => s + Math.max(0, i.product.mrp - i.product.price) * i.qty, 0)
 
   return (
     <AnimatePresence>

@@ -9,7 +9,7 @@ import { formatINR } from '../data/products.js'
 export default function ProductCard({ product, index = 0 }) {
   const { addToCart, wishlist, toggleWishlist, showToast } = useStore()
   const wished = wishlist.includes(product.id)
-  const off = Math.round(((product.mrp - product.price) / product.mrp) * 100)
+  const off = product.mrp > product.price ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0
   const buyable = product.stock === 'in'
 
   return (
@@ -56,9 +56,9 @@ export default function ProductCard({ product, index = 0 }) {
           <div>
             <div className="flex items-baseline gap-2">
               <span className="font-display text-xl text-plum-900">{formatINR(product.price)}</span>
-              <span className="text-sm text-plum-800/50 line-through">{formatINR(product.mrp)}</span>
+              {off > 0 && <span className="text-sm text-plum-800/50 line-through">{formatINR(product.mrp)}</span>}
             </div>
-            <span className="text-xs font-bold text-emerald-600">{off}% off · free delivery</span>
+            <span className="text-xs font-bold text-emerald-600">{off > 0 ? `${off}% off · ` : ''}free delivery</span>
           </div>
           <motion.button
             whileTap={{ scale: 0.92 }}
