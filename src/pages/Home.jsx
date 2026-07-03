@@ -15,6 +15,7 @@ import {
   Truck,
 } from 'lucide-react'
 import PageWrap from '../components/PageWrap.jsx'
+import DesktopClone from '../components/DesktopClone.jsx'
 import ProductCard from '../components/ProductCard.jsx'
 import ProductVisual from '../components/ProductVisual.jsx'
 import Stars from '../components/Stars.jsx'
@@ -59,7 +60,7 @@ function Hero() {
         />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pb-20 pt-14 sm:px-6 lg:grid-cols-2 lg:pt-20">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-2 items-center gap-12 px-6 pb-20 pt-20">
         <div>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -74,7 +75,7 @@ function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.08 }}
-            className="font-display text-4xl leading-[1.12] text-plum-900 sm:text-5xl lg:text-6xl"
+            className="font-display text-6xl leading-[1.12] text-plum-900"
           >
             {content.heroTitlePrefix}
             <span className="text-blush-500">{content.heroTitleHighlight}</span>
@@ -128,7 +129,7 @@ function Hero() {
         </div>
 
         {/* hero visual collage */}
-        <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+        <div className="relative mx-auto w-full max-w-none">
           <motion.div
             initial={{ opacity: 0, scale: 0.92, rotate: -2 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -151,7 +152,7 @@ function Hero() {
             <motion.div
               animate={{ y: [0, 12, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-              className="absolute -bottom-8 -right-4 flex items-center gap-3 rounded-3xl bg-white p-3 pr-5 shadow-lift sm:-right-8"
+              className="absolute -bottom-8 -right-8 flex items-center gap-3 rounded-3xl bg-white p-3 pr-5 shadow-lift"
             >
               <ProductVisual product={second} className="h-16 w-16 rounded-2xl" />
               <div>
@@ -188,11 +189,11 @@ function Featured() {
   const { products } = useAdmin()
   const featured = products.slice(0, 4)
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+    <section className="mx-auto max-w-7xl px-6 py-20">
       <motion.div {...fadeUp} className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-bold uppercase tracking-widest text-blush-500">The collection</p>
-          <h2 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">Kits women swear by</h2>
+          <h2 className="mt-2 font-display text-4xl text-plum-900">Kits women swear by</h2>
         </div>
         <Link
           to="/shop"
@@ -202,7 +203,7 @@ function Featured() {
           <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
         </Link>
       </motion.div>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-4 gap-6">
         {featured.map((p, i) => (
           <ProductCard key={p.id} product={p} index={i} />
         ))}
@@ -217,13 +218,13 @@ function InsideTheKit() {
   if (!kit) return null
   return (
     <section className="bg-white py-20">
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 items-center gap-12 px-6">
         <motion.div {...fadeUp}>
           <ProductVisual product={kit} className="aspect-square w-full rounded-[2.5rem] shadow-soft" />
         </motion.div>
         <motion.div {...fadeUp}>
           <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Inside every box</p>
-          <h2 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">Packed like a care package from your best friend</h2>
+          <h2 className="mt-2 font-display text-4xl text-plum-900">Packed like a care package from your best friend</h2>
           <ul className="mt-8 space-y-4">
             {kit.contents.map((c, i) => (
               <motion.li
@@ -260,12 +261,12 @@ function HowItWorks() {
     { icon: HandHeart, title: 'Pay at your door', text: 'No advance payment. Check the box, then pay cash or UPI on delivery.' },
   ]
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+    <section className="mx-auto max-w-7xl px-6 py-20">
       <motion.div {...fadeUp} className="mb-12 text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Simple by design</p>
-        <h2 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">How Flowa works</h2>
+        <h2 className="mt-2 font-display text-4xl text-plum-900">How Flowa works</h2>
       </motion.div>
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid grid-cols-3 gap-6">
         {steps.map((s, i) => (
           <motion.div
             key={s.title}
@@ -292,12 +293,12 @@ function Testimonials() {
   const { reviews } = useAdmin()
   return (
     <section className="overflow-hidden bg-gradient-to-b from-blush-50 to-cream py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mx-auto max-w-7xl px-6">
         <motion.div {...fadeUp} className="mb-12 text-center">
           <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Genuine stories</p>
-          <h2 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">Remarkable relief, in their words</h2>
+          <h2 className="mt-2 font-display text-4xl text-plum-900">Remarkable relief, in their words</h2>
         </motion.div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-3 gap-6">
           {reviews.map((r, i) => (
             <motion.figure
               key={r.name}
@@ -332,10 +333,10 @@ function Testimonials() {
 function FaqPreview() {
   const { faqs } = useAdmin()
   return (
-    <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6">
+    <section className="mx-auto max-w-3xl px-6 py-20">
       <motion.div {...fadeUp} className="mb-10 text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Good to know</p>
-        <h2 className="mt-2 font-display text-3xl text-plum-900 sm:text-4xl">Questions, answered gently</h2>
+        <h2 className="mt-2 font-display text-4xl text-plum-900">Questions, answered gently</h2>
       </motion.div>
       <Accordion items={faqs.slice(0, 4)} />
       <motion.div {...fadeUp} className="mt-8 text-center">
@@ -350,17 +351,17 @@ function FaqPreview() {
 function FinalCta() {
   const { content } = useAdmin()
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6">
+    <section className="mx-auto max-w-7xl px-6">
       <motion.div
         {...fadeUp}
-        className="relative overflow-hidden rounded-[2.5rem] bg-plum-900 px-6 py-16 text-center sm:px-16"
+        className="relative overflow-hidden rounded-[2.5rem] bg-plum-900 px-16 py-16 text-center"
       >
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
           <div className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-blush-500/30 blur-3xl" />
           <div className="absolute -bottom-20 -right-10 h-72 w-72 rounded-full bg-lav-500/30 blur-3xl" />
         </div>
         <div className="relative">
-          <h2 className="mx-auto max-w-2xl font-display text-3xl leading-snug text-white sm:text-4xl">
+          <h2 className="mx-auto max-w-2xl font-display text-4xl leading-snug text-white">
             {content.finalCtaTitle}
           </h2>
           <p className="mx-auto mt-4 max-w-md text-blush-100/80">
@@ -390,15 +391,17 @@ function FinalCta() {
 
 export default function Home() {
   return (
-    <PageWrap>
-      <Hero />
-      <Marquee />
-      <Featured />
-      <InsideTheKit />
-      <HowItWorks />
-      <Testimonials />
-      <FaqPreview />
-      <FinalCta />
-    </PageWrap>
+    <DesktopClone>
+      <PageWrap>
+        <Hero />
+        <Marquee />
+        <Featured />
+        <InsideTheKit />
+        <HowItWorks />
+        <Testimonials />
+        <FaqPreview />
+        <FinalCta />
+      </PageWrap>
+    </DesktopClone>
   )
 }
