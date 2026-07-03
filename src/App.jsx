@@ -29,6 +29,8 @@ function ScrollToTop() {
 export default function App() {
   const location = useLocation()
   const isAdmin = location.pathname === '/admin'
+  const isProductDetail = location.pathname.startsWith('/product/')
+  const useDefaultLayout = isAdmin || isProductDetail
 
   const routes = (
     <AnimatePresence mode="wait">
@@ -52,14 +54,15 @@ export default function App() {
   return (
     <div className="flex min-h-dvh flex-col">
       <ScrollToTop />
-      {/* Admin keeps the regular responsive nav/footer (own layout, not part of
-          the desktop-clone customer site) — everything else renders at desktop
-          breakpoints and is scaled down to fit narrow viewports. */}
-      <DesktopClone disabled={isAdmin} width={760}>
+      {/* Admin and the product detail page keep the regular responsive
+          nav/footer/layout (own layout, not part of the desktop-clone
+          customer site) — everything else renders at desktop breakpoints
+          and is scaled down to fit narrow viewports. */}
+      <DesktopClone disabled={useDefaultLayout} width={760}>
         <div className="flex min-h-dvh flex-col">
-          <Navbar desktopOnly={!isAdmin} />
+          <Navbar desktopOnly={!useDefaultLayout} />
           <main className="flex-1">{routes}</main>
-          <Footer desktopOnly={!isAdmin} />
+          <Footer desktopOnly={!useDefaultLayout} />
         </div>
       </DesktopClone>
       <CartDrawer />
