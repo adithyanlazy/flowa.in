@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,300;6..12,400;6..12,500;6..12,600;6..12,700;6..12,800&family=Varela+Round&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --color-blush-50: #fdf2f8;
+  --color-blush-100: #fce7f3;
+  --color-blush-200: #fbcfe8;
+  --color-blush-300: #f9a8d4;
+  --color-blush-400: #f472b6;
+  --color-blush-500: #ec4899;
+  --color-blush-600: #db2777;
+  --color-blush-700: #be185d;
+
+  --color-plum-50: #fdf4f9;
+  --color-plum-700: #9d2463;
+  --color-plum-800: #831843;
+  --color-plum-900: #500724;
+
+  --color-lav-100: #ede9fe;
+  --color-lav-200: #ddd6fe;
+  --color-lav-400: #a78bfa;
+  --color-lav-500: #8b5cf6;
+  --color-lav-600: #7c3aed;
+
+  --color-cream: #fffbf7;
+
+  --font-display: 'Varela Round', ui-rounded, sans-serif;
+  --font-body: 'Nunito Sans', ui-sans-serif, sans-serif;
+
+  --shadow-soft: 0 4px 24px -6px rgb(236 72 153 / 0.14);
+  --shadow-lift: 0 16px 40px -12px rgb(131 24 67 / 0.18);
+
+  --animate-marquee: marquee 28s linear infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-cream);
+  color: var(--color-plum-900);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+}
+
+::selection {
+  background: var(--color-blush-200);
+  color: var(--color-plum-900);
+}
+
+/* soft scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--color-blush-50); }
+::-webkit-scrollbar-thumb { background: var(--color-blush-300); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-blush-400); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
