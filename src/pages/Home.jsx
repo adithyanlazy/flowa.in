@@ -136,7 +136,7 @@ function Hero() {
             className="relative"
           >
             <Link to={`/product/${featured.id}`} className="block overflow-hidden rounded-[2.5rem] shadow-lift">
-              <img src="/images/hero.jpg" alt="Flowa cotton pads and chocolate, flat lay" className="aspect-[5/4] w-full object-cover" />
+              <img src={content.heroImage} alt="Flowa cotton pads and chocolate, flat lay" className="aspect-[5/4] w-full object-cover" />
             </Link>
             <motion.div
               animate={{ y: [0, -10, 0] }}
