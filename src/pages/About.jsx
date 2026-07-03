@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { HandHeart, Leaf, Sparkles } from 'lucide-react'
 import PageWrap from '../components/PageWrap.jsx'
+import { useAdmin } from '../context/AdminContext.jsx'
 
 const values = [
   {
@@ -29,6 +30,7 @@ const stats = [
 ]
 
 export default function About() {
+  const { content } = useAdmin()
   return (
     <PageWrap>
       <section className="relative overflow-hidden">
@@ -55,7 +57,7 @@ export default function About() {
             transition={{ duration: 0.5 }}
             className="font-display text-4xl leading-tight text-plum-900 sm:text-5xl"
           >
-            We started Flowa because period care in India felt like an afterthought
+            {content.aboutTitle}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -63,9 +65,7 @@ export default function About() {
             transition={{ duration: 0.5, delay: 0.12 }}
             className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-plum-800/70"
           >
-            Scratchy pads wrapped in newspaper. Cramps dismissed as drama. Chemists who hand you a black plastic bag
-            like you are buying something shameful. We thought: what if a period box felt like a gift from someone who
-            truly gets it? So we built one — soft, honest, chemical-free, and delivered with zero judgment.
+            {content.aboutBody}
           </motion.p>
         </div>
       </section>

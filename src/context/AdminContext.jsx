@@ -29,6 +29,9 @@ export const defaultSiteContent = {
   footerTagline:
     'Thoughtful period care, delivered with love. Chemical-free essentials and real cramp relief for 50,000+ women across India.',
   finalCtaTitle: 'Your next period deserves better. Let us take care of it.',
+  aboutTitle: 'We started Flowa because period care in India felt like an afterthought',
+  aboutBody:
+    'Scratchy pads wrapped in newspaper. Cramps dismissed as drama. Chemists who hand you a black plastic bag like you are buying something shameful. We thought: what if a period box felt like a gift from someone who truly gets it? So we built one — soft, honest, chemical-free, and delivered with zero judgment.',
 }
 
 export const defaultTheme = {
