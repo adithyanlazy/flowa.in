@@ -1,17 +1,16 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
   BadgeCheck,
   Box,
-  Flower2,
   HandHeart,
   Heart,
   Leaf,
   MessageCircle,
   Package,
   ShieldCheck,
-  Sparkles,
   Truck,
 } from 'lucide-react'
 import PageWrap from '../components/PageWrap.jsx'
@@ -41,125 +40,127 @@ const marqueeItems = [
 function Hero() {
   const { products, content } = useAdmin()
   const featured = products[0]
-  const second = products[6] || products[products.length - 1]
+  const second = products[6] || products[1] || products[products.length - 1]
+
+  const slides = [
+    {
+      image: content.heroImage,
+      titlePrefix: content.heroTitlePrefix,
+      titleHighlight: content.heroTitleHighlight,
+      subtitle: content.heroSubtitle,
+      cta: 'Shop the kits',
+      to: '/shop',
+    },
+    {
+      image: second?.photo || content.heroImage,
+      titlePrefix: 'Everything you need, ',
+      titleHighlight: 'in one pack.',
+      subtitle: 'Pads, patches and comfort essentials — delivered discreetly, right on time.',
+      cta: 'Shop now',
+      to: '/shop',
+    },
+  ]
+
+  const [active, setActive] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => setActive((s) => (s + 1) % slides.length), 6000)
+    return () => clearInterval(id)
+  }, [slides.length])
+
   if (!featured) return null
+
   return (
     <section className="relative overflow-hidden">
-      {/* ambient blobs */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <motion.div
-          animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-blush-200/60 blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, -24, 0], y: [0, 24, 0] }}
-          transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -right-20 top-40 h-80 w-80 rounded-full bg-lav-200/60 blur-3xl"
-        />
+      {/* top announcement bar */}
+      <div className="bg-plum-900 py-2.5 text-center text-xs font-bold tracking-wide text-white">
+        <span className="inline-flex items-center gap-1.5">
+          <Truck size={14} className="text-blush-300" /> {content.trustBadge}
+        </span>
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl grid-cols-2 items-center gap-12 px-6 pb-20 pt-20">
-        <div>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-plum-800 shadow-soft"
+      <div className="group/slider relative h-[520px] w-full overflow-hidden sm:h-[580px] lg:h-[640px]">
+        {slides.map((s, i) => (
+          <div
+            key={i}
+            aria-hidden={i !== active}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              i === active ? 'opacity-100' : 'pointer-events-none opacity-0'
+            }`}
           >
-            <Sparkles size={14} className="text-blush-500" />
-            {content.trustBadge}
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.08 }}
-            className="font-display text-6xl leading-[1.12] text-plum-900"
-          >
-            {content.heroTitlePrefix}
-            <span className="text-blush-500">{content.heroTitleHighlight}</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.16 }}
-            className="mt-5 max-w-md text-lg leading-relaxed text-plum-800/70"
-          >
-            {content.heroSubtitle}
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.24 }}
-            className="mt-8 flex flex-wrap items-center gap-4"
-          >
-            <Link
-              to="/shop"
-              className="group inline-flex items-center gap-2 rounded-full bg-plum-900 px-8 py-4 text-sm font-bold text-white shadow-lift transition-colors duration-200 hover:bg-blush-600"
-            >
-              Shop the kits
-              <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
-            </Link>
-            <Link
-              to="/about"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-bold text-plum-900 shadow-soft transition-colors duration-200 hover:bg-blush-100"
-            >
-              Our story
-            </Link>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-8 flex items-center gap-3"
-          >
-            <div className="flex -space-x-2" aria-hidden="true">
-              {['#f9a8d4', '#c4b5fd', '#fda4af', '#86efac'].map((c, i) => (
-                <span key={i} className="grid h-9 w-9 place-items-center rounded-full border-2 border-cream" style={{ background: c }}>
-                  <Flower2 size={15} className="text-white" />
-                </span>
-              ))}
+            <img src={s.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-plum-900/80 via-plum-900/40 to-transparent" />
+            <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6">
+              <motion.div
+                key={i === active ? `active-${i}` : `inactive-${i}`}
+                initial={{ opacity: 0, y: 24 }}
+                animate={i === active ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.15 }}
+                className="max-w-xl"
+              >
+                <h1 className="font-display text-5xl leading-[1.12] text-white sm:text-6xl">
+                  {s.titlePrefix}
+                  <span className="text-blush-300">{s.titleHighlight}</span>
+                </h1>
+                <p className="mt-5 max-w-md text-lg leading-relaxed text-white/80">{s.subtitle}</p>
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <Link
+                    to={s.to}
+                    className="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-bold text-plum-900 shadow-lift transition-colors duration-200 hover:bg-blush-100"
+                  >
+                    {s.cta}
+                    <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
+                  <div className="flex items-center gap-2 text-white/90">
+                    <Stars rating={4.8} showValue />
+                    <span className="text-xs">{content.reviewsBlurb}</span>
+                  </div>
+                </div>
+              </motion.div>
             </div>
-            <div className="text-sm">
-              <Stars rating={4.8} showValue />
-              <p className="text-plum-800/60">{content.reviewsBlurb}</p>
-            </div>
-          </motion.div>
+          </div>
+        ))}
+
+        {/* persistent trust chip */}
+        <div className="absolute bottom-6 right-6 z-20 hidden items-center gap-2 rounded-2xl bg-white/95 px-4 py-3 shadow-lift sm:flex">
+          <BadgeCheck size={18} className="text-emerald-500" />
+          <div>
+            <p className="text-xs font-bold text-plum-900">Rash-free promise</p>
+            <p className="text-[11px] text-plum-800/60">100% cotton top sheet</p>
+          </div>
         </div>
 
-        {/* hero visual collage */}
-        <div className="relative mx-auto w-full max-w-none">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92, rotate: -2 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="relative"
-          >
-            <Link to={`/product/${featured.id}`} className="block overflow-hidden rounded-[2.5rem] shadow-lift">
-              <img src={content.heroImage} alt="Flowa cotton pads and chocolate, flat lay" className="aspect-square w-full object-cover" />
-            </Link>
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute -left-6 -top-6 rounded-3xl bg-white p-4 shadow-lift"
-            >
-              <p className="flex items-center gap-2 text-sm font-bold text-plum-900">
-                <BadgeCheck size={18} className="text-emerald-500" /> Rash-free promise
-              </p>
-              <p className="mt-0.5 text-xs text-plum-800/60">100% cotton top sheet</p>
-            </motion.div>
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-              className="absolute -bottom-8 -right-8 flex items-center gap-3 rounded-3xl bg-white p-3 pr-5 shadow-lift"
-            >
-              <ProductVisual product={second} className="h-16 w-16 rounded-2xl" />
-              <div>
-                <p className="text-sm font-bold text-plum-900">Cramp relief patches</p>
-                <p className="text-xs text-plum-800/60">Relief in ~15 minutes</p>
-              </div>
-            </motion.div>
-          </motion.div>
+        {/* arrows, revealed on hover */}
+        <button
+          type="button"
+          onClick={() => setActive((s) => (s - 1 + slides.length) % slides.length)}
+          aria-label="Previous slide"
+          className="absolute left-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/90 p-2.5 opacity-0 shadow-lift transition-opacity duration-300 group-hover/slider:opacity-100 sm:flex"
+        >
+          <ArrowRight size={18} className="rotate-180 text-plum-900" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setActive((s) => (s + 1) % slides.length)}
+          aria-label="Next slide"
+          className="absolute right-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/90 p-2.5 opacity-0 shadow-lift transition-opacity duration-300 group-hover/slider:opacity-100 sm:flex"
+        >
+          <ArrowRight size={18} className="text-plum-900" />
+        </button>
+
+        {/* dot navigation */}
+        <div className="absolute inset-x-0 bottom-6 z-20 flex justify-center gap-3">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setActive(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === active ? 'w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
+              }`}
+            />
+          ))}
         </div>
       </div>
     </section>
