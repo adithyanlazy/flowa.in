@@ -1,19 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { products as baseProducts, reviews as baseReviews, faqs as baseFaqs } from '../data/products.js'
+import { supabase, supabaseEnabled } from '../lib/supabase.js'
 
 const AdminContext = createContext(null)
 
-const LS_KEYS = {
-  overrides: 'flowa-admin-product-overrides',
-  custom: 'flowa-admin-custom-products',
-  hidden: 'flowa-admin-hidden-products',
-  order: 'flowa-admin-product-order',
-  reviews: 'flowa-admin-reviews',
-  faqs: 'flowa-admin-faqs',
-  content: 'flowa-admin-site-content',
-  theme: 'flowa-admin-theme',
-  auth: 'flowa-admin-auth',
-}
+const ROW_ID = 'flowa'
+const LS_KEY = 'flowa-admin-state'
+const LS_AUTH_KEY = 'flowa-admin-auth'
 
 export const defaultSiteContent = {
   announcement: 'Free delivery on every order · Pay on Delivery available across India',
@@ -43,19 +36,44 @@ export const defaultTheme = {
 
 const ADMIN_PASSCODE = 'flowa2026'
 
-function load(key, fallback) {
+const defaultData = {
+  overrides: {},
+  customProducts: [],
+  hiddenIds: [],
+  order: null,
+  reviews: baseReviews,
+  faqs: baseFaqs,
+  content: defaultSiteContent,
+  theme: defaultTheme,
+}
+
+function loadCache() {
   try {
-    const raw = localStorage.getItem(key)
-    return raw ? JSON.parse(raw) : fallback
+    const raw = localStorage.getItem(LS_KEY)
+    return raw ? { ...defaultData, ...JSON.parse(raw) } : defaultData
   } catch {
-    return fallback
+    return defaultData
   }
 }
-function save(key, value) {
+function saveCache(data) {
   try {
-    localStorage.setItem(key, JSON.stringify(value))
+    localStorage.setItem(LS_KEY, JSON.stringify(data))
   } catch (err) {
-    console.error(`Flowa admin: failed to save "${key}" to localStorage`, err)
+    console.error('Flowa admin: failed to cache state locally', err)
+  }
+}
+function loadAuth() {
+  try {
+    return localStorage.getItem(LS_AUTH_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+function saveAuth(v) {
+  try {
+    localStorage.setItem(LS_AUTH_KEY, v ? '1' : '0')
+  } catch {
+    // ignore
   }
 }
 
@@ -65,26 +83,79 @@ function applyTheme(theme) {
 }
 
 export function AdminProvider({ children }) {
-  const [overrides, setOverrides] = useState(() => load(LS_KEYS.overrides, {}))
-  const [customProducts, setCustomProducts] = useState(() => load(LS_KEYS.custom, []))
-  const [hiddenIds, setHiddenIds] = useState(() => load(LS_KEYS.hidden, []))
-  const [order, setOrder] = useState(() => load(LS_KEYS.order, null))
-  const [reviews, setReviewsState] = useState(() => load(LS_KEYS.reviews, baseReviews))
-  const [faqs, setFaqsState] = useState(() => load(LS_KEYS.faqs, baseFaqs))
-  const [content, setContentState] = useState(() => ({ ...defaultSiteContent, ...load(LS_KEYS.content, {}) }))
-  const [theme, setThemeState] = useState(() => ({ ...defaultTheme, ...load(LS_KEYS.theme, {}) }))
-  const [authed, setAuthed] = useState(() => load(LS_KEYS.auth, false))
+  const [data, setData] = useState(loadCache)
+  const [authed, setAuthed] = useState(loadAuth)
+  const [loaded, setLoaded] = useState(!supabaseEnabled)
+  const skipNextSync = useRef(false)
+  const saveTimer = useRef(null)
 
-  useEffect(() => applyTheme(theme), [theme])
-  useEffect(() => save(LS_KEYS.overrides, overrides), [overrides])
-  useEffect(() => save(LS_KEYS.custom, customProducts), [customProducts])
-  useEffect(() => save(LS_KEYS.hidden, hiddenIds), [hiddenIds])
-  useEffect(() => save(LS_KEYS.order, order), [order])
-  useEffect(() => save(LS_KEYS.reviews, reviews), [reviews])
-  useEffect(() => save(LS_KEYS.faqs, faqs), [faqs])
-  useEffect(() => save(LS_KEYS.content, content), [content])
-  useEffect(() => save(LS_KEYS.theme, theme), [theme])
-  useEffect(() => save(LS_KEYS.auth, authed), [authed])
+  useEffect(() => applyTheme(data.theme), [data.theme])
+
+  // Initial fetch from Supabase + realtime subscription so other devices see admin edits.
+  // Writes are blocked (see persist effect below) until this resolves, so a slow/failed
+  // fetch can never race the debounced save and clobber the shared row with local defaults.
+  useEffect(() => {
+    if (!supabaseEnabled) return
+    let channel
+    let cancelled = false
+    ;(async () => {
+      const { data: row, error } = await supabase
+        .from('store_state')
+        .select('data')
+        .eq('id', ROW_ID)
+        .maybeSingle()
+      if (!cancelled) {
+        if (!error && row?.data && Object.keys(row.data).length) {
+          skipNextSync.current = true
+          setData({ ...defaultData, ...row.data })
+        }
+        setLoaded(true)
+      }
+
+      channel = supabase
+        .channel('store_state_changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'store_state', filter: `id=eq.${ROW_ID}` },
+          (payload) => {
+            if (payload.new?.data) {
+              skipNextSync.current = true
+              setData({ ...defaultData, ...payload.new.data })
+            }
+          },
+        )
+        .subscribe()
+    })()
+    return () => {
+      cancelled = true
+      if (channel) supabase.removeChannel(channel)
+    }
+  }, [])
+
+  // Persist: localStorage cache always (instant, offline-safe); Supabase debounced (shared, cross-device).
+  // Gated on `loaded` so we never push local defaults over real remote data before the initial fetch lands.
+  useEffect(() => {
+    saveCache(data)
+    if (skipNextSync.current) {
+      skipNextSync.current = false
+      return
+    }
+    if (!supabaseEnabled || !loaded) return
+    clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(() => {
+      supabase
+        .from('store_state')
+        .upsert({ id: ROW_ID, data, updated_at: new Date().toISOString() })
+        .then(({ error }) => {
+          if (error) console.error('Flowa admin: failed to sync to Supabase', error)
+        })
+    }, 500)
+    return () => clearTimeout(saveTimer.current)
+  }, [data, loaded])
+
+  useEffect(() => saveAuth(authed), [authed])
+
+  const { overrides, customProducts, hiddenIds, order, reviews, faqs, content, theme } = data
 
   const products = useMemo(() => {
     const merged = baseProducts.map((p) => ({ ...p, ...overrides[p.id] }))
@@ -102,64 +173,62 @@ export function AdminProvider({ children }) {
   const isCustom = (id) => customProducts.some((p) => p.id === id)
 
   const updateProduct = (id, patch) => {
-    if (isCustom(id)) {
-      setCustomProducts((list) => list.map((p) => (p.id === id ? { ...p, ...patch } : p)))
-    } else {
-      setOverrides((o) => ({ ...o, [id]: { ...o[id], ...patch } }))
-    }
+    setData((d) =>
+      d.customProducts.some((p) => p.id === id)
+        ? { ...d, customProducts: d.customProducts.map((p) => (p.id === id ? { ...p, ...patch } : p)) }
+        : { ...d, overrides: { ...d.overrides, [id]: { ...d.overrides[id], ...patch } } },
+    )
   }
 
   const addProduct = (product) => {
     const id = product.id || `custom-${Date.now()}`
-    setCustomProducts((list) => [...list, { ...product, id }])
+    setData((d) => ({ ...d, customProducts: [...d.customProducts, { ...product, id }] }))
     return id
   }
 
   const deleteProduct = (id) => {
-    if (isCustom(id)) {
-      setCustomProducts((list) => list.filter((p) => p.id !== id))
-    } else {
-      setHiddenIds((ids) => (ids.includes(id) ? ids : [...ids, id]))
-    }
+    setData((d) =>
+      d.customProducts.some((p) => p.id === id)
+        ? { ...d, customProducts: d.customProducts.filter((p) => p.id !== id) }
+        : d.hiddenIds.includes(id)
+          ? d
+          : { ...d, hiddenIds: [...d.hiddenIds, id] },
+    )
   }
 
-  const restoreProduct = (id) => setHiddenIds((ids) => ids.filter((x) => x !== id))
+  const restoreProduct = (id) => setData((d) => ({ ...d, hiddenIds: d.hiddenIds.filter((x) => x !== id) }))
 
-  const resetProduct = (id) => setOverrides((o) => { const next = { ...o }; delete next[id]; return next })
+  const resetProduct = (id) =>
+    setData((d) => {
+      const next = { ...d.overrides }
+      delete next[id]
+      return { ...d, overrides: next }
+    })
 
   const getProduct = (id) => products.find((p) => p.id === id)
 
-  const setSiteContent = (patch) => setContentState((c) => ({ ...c, ...patch }))
-  const setThemeColor = (patch) => setThemeState((t) => ({ ...t, ...patch }))
+  const setSiteContent = (patch) => setData((d) => ({ ...d, content: { ...d.content, ...patch } }))
+  const setThemeColor = (patch) => setData((d) => ({ ...d, theme: { ...d.theme, ...patch } }))
+  const setReviews = (next) => setData((d) => ({ ...d, reviews: next }))
+  const setFaqs = (next) => setData((d) => ({ ...d, faqs: next }))
 
-  const resetAll = () => {
-    setOverrides({})
-    setCustomProducts([])
-    setHiddenIds([])
-    setOrder(null)
-    setReviewsState(baseReviews)
-    setFaqsState(baseFaqs)
-    setContentState(defaultSiteContent)
-    setThemeState(defaultTheme)
-  }
+  const resetAll = () => setData({ ...defaultData })
 
-  const exportData = () =>
-    JSON.stringify(
-      { overrides, customProducts, hiddenIds, order, reviews, faqs, content, theme },
-      null,
-      2,
-    )
+  const exportData = () => JSON.stringify(data, null, 2)
 
   const importData = (json) => {
-    const data = JSON.parse(json)
-    if (data.overrides) setOverrides(data.overrides)
-    if (data.customProducts) setCustomProducts(data.customProducts)
-    if (data.hiddenIds) setHiddenIds(data.hiddenIds)
-    if (data.order !== undefined) setOrder(data.order)
-    if (data.reviews) setReviewsState(data.reviews)
-    if (data.faqs) setFaqsState(data.faqs)
-    if (data.content) setContentState({ ...defaultSiteContent, ...data.content })
-    if (data.theme) setThemeState({ ...defaultTheme, ...data.theme })
+    const parsed = JSON.parse(json)
+    setData((d) => ({
+      ...d,
+      ...(parsed.overrides && { overrides: parsed.overrides }),
+      ...(parsed.customProducts && { customProducts: parsed.customProducts }),
+      ...(parsed.hiddenIds && { hiddenIds: parsed.hiddenIds }),
+      ...(parsed.order !== undefined && { order: parsed.order }),
+      ...(parsed.reviews && { reviews: parsed.reviews }),
+      ...(parsed.faqs && { faqs: parsed.faqs }),
+      ...(parsed.content && { content: { ...defaultSiteContent, ...parsed.content } }),
+      ...(parsed.theme && { theme: { ...defaultTheme, ...parsed.theme } }),
+    }))
   }
 
   const login = (pass) => {
@@ -189,8 +258,8 @@ export function AdminProvider({ children }) {
     hiddenIds,
     baseProducts,
     isCustom,
-    setReviews: setReviewsState,
-    setFaqs: setFaqsState,
+    setReviews,
+    setFaqs,
     setSiteContent,
     setThemeColor,
     resetAll,
