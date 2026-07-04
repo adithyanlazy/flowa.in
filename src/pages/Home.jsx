@@ -52,7 +52,7 @@ function Hero() {
       to: '/shop',
     },
     {
-      image: second?.photo || content.heroImage,
+      image: content.heroImage2 || second?.photo || content.heroImage,
       titlePrefix: 'Everything you need, ',
       titleHighlight: 'in one pack.',
       subtitle: 'Pads, patches and comfort essentials — delivered discreetly, right on time.',

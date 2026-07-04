@@ -26,6 +26,7 @@ export const defaultSiteContent = {
   aboutBody:
     'Scratchy pads wrapped in newspaper. Cramps dismissed as drama. Chemists who hand you a black plastic bag like you are buying something shameful. We thought: what if a period box felt like a gift from someone who truly gets it? So we built one — soft, honest, chemical-free, and delivered with zero judgment.',
   heroImage: '/images/hero.jpg',
+  heroImage2: baseProducts[6]?.photo || baseProducts[1]?.photo || '/images/hero.jpg',
 }
 
 export const defaultTheme = {
@@ -47,10 +48,22 @@ const defaultData = {
   theme: defaultTheme,
 }
 
+// Shallow-spreading `defaultData` over stored/remote data would let a stale
+// `content`/`theme` object (cached before a new default key was added, e.g.
+// heroImage2) silently wipe that key out — deep-merge those two nested configs.
+function mergeStoredData(incoming) {
+  return {
+    ...defaultData,
+    ...incoming,
+    content: { ...defaultSiteContent, ...(incoming?.content || {}) },
+    theme: { ...defaultTheme, ...(incoming?.theme || {}) },
+  }
+}
+
 function loadCache() {
   try {
     const raw = localStorage.getItem(LS_KEY)
-    return raw ? { ...defaultData, ...JSON.parse(raw) } : defaultData
+    return raw ? mergeStoredData(JSON.parse(raw)) : defaultData
   } catch {
     return defaultData
   }
@@ -107,7 +120,7 @@ export function AdminProvider({ children }) {
       if (!cancelled) {
         if (!error && row?.data && Object.keys(row.data).length) {
           skipNextSync.current = true
-          setData({ ...defaultData, ...row.data })
+          setData(mergeStoredData(row.data))
         }
         setLoaded(true)
       }
@@ -120,7 +133,7 @@ export function AdminProvider({ children }) {
           (payload) => {
             if (payload.new?.data) {
               skipNextSync.current = true
-              setData({ ...defaultData, ...payload.new.data })
+              setData(mergeStoredData(payload.new.data))
             }
           },
         )

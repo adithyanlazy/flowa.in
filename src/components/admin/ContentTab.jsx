@@ -46,7 +46,7 @@ function compressImage(file, maxWidth = 1600, quality = 0.75) {
   })
 }
 
-function HeroImageEditor() {
+function HeroImageEditor({ fieldKey, label }) {
   const { content, setSiteContent } = useAdmin()
   const fileRef = useRef(null)
   const [error, setError] = useState('')
@@ -65,20 +65,24 @@ function HeroImageEditor() {
     setError('')
     try {
       const dataUrl = await compressImage(file)
-      setSiteContent({ heroImage: dataUrl })
+      setSiteContent({ [fieldKey]: dataUrl })
     } catch {
       setError('Could not process that image — try a different file')
     }
     e.target.value = ''
   }
 
-  const remove = () => setSiteContent({ heroImage: defaultSiteContent.heroImage })
+  const remove = () => setSiteContent({ [fieldKey]: defaultSiteContent[fieldKey] })
 
   return (
     <div className="rounded-3xl bg-white p-5 shadow-soft">
-      <p className={labelClass}>Hero background image</p>
+      <p className={labelClass}>{label}</p>
       <div className="mt-2 flex flex-wrap items-center gap-4">
-        <img src={content.heroImage} alt="Current hero background" className="h-24 w-32 rounded-2xl object-cover shadow-soft" />
+        <img
+          src={content[fieldKey] || defaultSiteContent[fieldKey]}
+          alt={`Current ${label.toLowerCase()}`}
+          className="h-24 w-32 rounded-2xl object-cover shadow-soft"
+        />
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => fileRef.current?.click()}
@@ -87,7 +91,7 @@ function HeroImageEditor() {
             <Upload size={14} /> Upload new image
           </button>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
-          {content.heroImage !== defaultSiteContent.heroImage && (
+          {content[fieldKey] !== defaultSiteContent[fieldKey] && (
             <button
               onClick={remove}
               className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-red-50 px-5 py-2.5 text-sm font-bold text-red-700 transition-colors hover:bg-red-100"
@@ -124,7 +128,8 @@ export default function ContentTab() {
 
   return (
     <div className="space-y-4">
-      <HeroImageEditor />
+      <HeroImageEditor fieldKey="heroImage" label="Hero background image (slide 1)" />
+      <HeroImageEditor fieldKey="heroImage2" label="Hero background image (slide 2)" />
       <div className="space-y-4 rounded-3xl bg-white p-5 shadow-soft">
         {fields.map((f) => (
           <div key={f.key}>
