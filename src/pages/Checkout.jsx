@@ -88,16 +88,16 @@ export default function Checkout() {
   }
 
   return (
-    <PageWrap className="mx-auto max-w-6xl px-6 py-12">
+    <PageWrap className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
       <h1 className="font-display text-4xl text-plum-900">Checkout</h1>
       <p className="mt-2 flex items-center gap-1.5 text-sm text-plum-800/60">
         <Lock size={13} /> Your details are used only for this delivery.
       </p>
 
-      <form onSubmit={placeOrder} noValidate className="mt-10 grid grid-cols-[1.5fr_1fr] items-start gap-10">
+      <form onSubmit={placeOrder} noValidate className="mt-8 grid grid-cols-1 items-start gap-8 lg:mt-10 lg:grid-cols-[1.5fr_1fr] lg:gap-10">
         {/* address */}
         <div className="space-y-8">
-          <section className="rounded-3xl bg-white p-8 shadow-soft">
+          <section className="rounded-3xl bg-white p-6 shadow-soft sm:p-8">
             <h2 className="font-display text-xl text-plum-900">Delivery address</h2>
             <div className="mt-6 grid grid-cols-2 gap-5">
               {fields.map((f) => (
@@ -141,7 +141,7 @@ export default function Checkout() {
           </section>
 
           {/* payment */}
-          <section className="rounded-3xl bg-white p-8 shadow-soft">
+          <section className="rounded-3xl bg-white p-6 shadow-soft sm:p-8">
             <h2 className="font-display text-xl text-plum-900">Payment method</h2>
             <div className="mt-6 space-y-3">
               <label className="flex cursor-pointer items-center gap-4 rounded-2xl border-2 border-blush-400 bg-blush-50 p-5">
@@ -172,7 +172,7 @@ export default function Checkout() {
         </div>
 
         {/* summary */}
-        <aside className="sticky top-28 rounded-3xl bg-white p-8 shadow-soft">
+        <aside className="rounded-3xl bg-white p-6 shadow-soft order-first lg:sticky lg:top-28 lg:order-none lg:p-8">
           <h2 className="font-display text-xl text-plum-900">Order summary</h2>
           <ul className="mt-5 space-y-4">
             {items.map(({ product, qty }) => (

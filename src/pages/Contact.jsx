@@ -29,7 +29,7 @@ export default function Contact() {
   }
 
   return (
-    <PageWrap className="mx-auto max-w-6xl px-6 py-14">
+    <PageWrap className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <div className="mb-12 max-w-xl">
         <p className="text-sm font-bold uppercase tracking-widest text-blush-500">We're listening</p>
         <h1 className="mt-2 font-display text-4xl text-plum-900">Talk to us about anything</h1>
@@ -39,7 +39,7 @@ export default function Contact() {
         </p>
       </div>
 
-      <div className="grid grid-cols-[1fr_1.3fr] gap-10">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.3fr] lg:gap-10">
         <div className="space-y-4">
           <img
             src="/images/contact.jpg"
@@ -74,7 +74,7 @@ export default function Contact() {
           </div>
         </div>
 
-        <form onSubmit={submit} noValidate className="rounded-3xl bg-white p-8 shadow-soft">
+        <form onSubmit={submit} noValidate className="rounded-3xl bg-white p-6 sm:p-8 shadow-soft">
           <div className="space-y-5">
             <div>
               <label htmlFor="c-name" className="mb-1.5 block text-sm font-bold text-plum-900">

@@ -79,7 +79,7 @@ function Hero() {
         </span>
       </div>
 
-      <div className="group/slider relative h-[520px] w-full overflow-hidden sm:h-[580px] lg:h-[640px]">
+      <div className="group/slider relative h-[440px] w-full overflow-hidden sm:h-[580px] lg:h-[640px]">
         {slides.map((s, i) => (
           <div
             key={i}
@@ -220,7 +220,7 @@ function InsideTheKit() {
   if (!kit) return null
   return (
     <section className="bg-white py-20">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 items-center gap-12 px-6">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-2 lg:gap-12">
         <motion.div {...fadeUp}>
           <ProductVisual product={kit} className="aspect-square w-full rounded-[2.5rem] shadow-soft" />
         </motion.div>
@@ -268,7 +268,7 @@ function HowItWorks() {
         <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Simple by design</p>
         <h2 className="mt-2 font-display text-4xl text-plum-900">How Flowa works</h2>
       </motion.div>
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {steps.map((s, i) => (
           <motion.div
             key={s.title}
@@ -300,7 +300,7 @@ function Testimonials() {
           <p className="text-sm font-bold uppercase tracking-widest text-blush-500">Genuine stories</p>
           <h2 className="mt-2 font-display text-4xl text-plum-900">Remarkable relief, in their words</h2>
         </motion.div>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {reviews.map((r, i) => (
             <motion.figure
               key={r.name}
@@ -356,7 +356,7 @@ function FinalCta() {
     <section className="mx-auto max-w-7xl px-6">
       <motion.div
         {...fadeUp}
-        className="relative overflow-hidden rounded-[2.5rem] bg-plum-900 px-16 py-16 text-center"
+        className="relative overflow-hidden rounded-[2.5rem] bg-plum-900 px-6 py-12 text-center sm:px-16 sm:py-16"
       >
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
           <div className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-blush-500/30 blur-3xl" />

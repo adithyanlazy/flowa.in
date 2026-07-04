@@ -3,7 +3,6 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
-import DesktopClone from './components/DesktopClone.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
 import SearchModal from './components/SearchModal.jsx'
 import Toast from './components/Toast.jsx'
@@ -28,9 +27,6 @@ function ScrollToTop() {
 
 export default function App() {
   const location = useLocation()
-  const isAdmin = location.pathname === '/admin'
-  const isProductDetail = location.pathname.startsWith('/product/')
-  const useDefaultLayout = isAdmin || isProductDetail
 
   const routes = (
     <AnimatePresence mode="wait">
@@ -54,15 +50,8 @@ export default function App() {
   return (
     <div className="flex min-h-dvh flex-col">
       <ScrollToTop />
-      {/* Navbar/Footer always render in their own real responsive mode (hamburger
-          menu, stacked footer columns) at full scale — they're excluded from the
-          desktop-clone zoom below so mobile gets a proper-sized nav/footer instead
-          of a shrunk desktop row. Only the routed page content still falls back
-          to the desktop-clone zoom for pages not yet audited for mobile layout. */}
       <Navbar />
-      <DesktopClone disabled={useDefaultLayout} width={760}>
-        <main className="flex-1">{routes}</main>
-      </DesktopClone>
+      <main className="flex-1">{routes}</main>
       <Footer />
       <CartDrawer />
       <SearchModal />

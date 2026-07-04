@@ -15,9 +15,9 @@ export default function WhatsAppButton() {
       transition={{ delay: 1.2, type: 'spring', damping: 15 }}
       whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.94 }}
-      className="fixed bottom-6 right-6 z-40 grid h-14 w-14 place-items-center rounded-full bg-emerald-500 text-white shadow-lift"
+      className="fixed bottom-4 right-4 z-40 grid h-12 w-12 place-items-center rounded-full bg-emerald-500 text-white shadow-lift sm:bottom-6 sm:right-6 sm:h-14 sm:w-14"
     >
-      <MessageCircle size={24} />
+      <MessageCircle size={22} />
     </motion.a>
   )
 }
