@@ -24,7 +24,7 @@ function Logo() {
   )
 }
 
-export default function Navbar({ desktopOnly = false }) {
+export default function Navbar() {
   const { cartCount, wishlist, setCartOpen, setSearchOpen } = useStore()
   const { content } = useAdmin()
   const [scrolled, setScrolled] = useState(false)
@@ -49,10 +49,10 @@ export default function Navbar({ desktopOnly = false }) {
           scrolled ? 'bg-cream/85 shadow-soft backdrop-blur-xl' : 'bg-cream/60 backdrop-blur-sm'
         }`}
       >
-        <nav className={`mx-auto flex max-w-7xl items-center justify-between gap-4 py-3 ${desktopOnly ? 'px-6' : 'px-4 sm:px-6'}`}>
+        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Logo />
 
-          <ul className={`items-center gap-1 ${desktopOnly ? 'flex' : 'hidden md:flex'}`}>
+          <ul className="hidden items-center gap-1 md:flex">
             {links.map((l) => (
               <li key={l.to}>
                 <NavLink
@@ -109,20 +109,18 @@ export default function Navbar({ desktopOnly = false }) {
                 )}
               </AnimatePresence>
             </button>
-            {!desktopOnly && (
-              <button
-                onClick={() => setMobileOpen((v) => !v)}
-                aria-label="Toggle menu"
-                className="grid h-11 w-11 cursor-pointer place-items-center rounded-full text-plum-800 transition-colors hover:bg-blush-100 md:hidden"
-              >
-                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
-            )}
+            <button
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label="Toggle menu"
+              className="grid h-11 w-11 cursor-pointer place-items-center rounded-full text-plum-800 transition-colors hover:bg-blush-100 md:hidden"
+            >
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </nav>
 
         <AnimatePresence>
-          {!desktopOnly && mobileOpen && (
+          {mobileOpen && (
             <motion.ul
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}

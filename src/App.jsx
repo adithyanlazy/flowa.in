@@ -54,17 +54,16 @@ export default function App() {
   return (
     <div className="flex min-h-dvh flex-col">
       <ScrollToTop />
-      {/* Admin and the product detail page keep the regular responsive
-          nav/footer/layout (own layout, not part of the desktop-clone
-          customer site) — everything else renders at desktop breakpoints
-          and is scaled down to fit narrow viewports. */}
+      {/* Navbar/Footer always render in their own real responsive mode (hamburger
+          menu, stacked footer columns) at full scale — they're excluded from the
+          desktop-clone zoom below so mobile gets a proper-sized nav/footer instead
+          of a shrunk desktop row. Only the routed page content still falls back
+          to the desktop-clone zoom for pages not yet audited for mobile layout. */}
+      <Navbar />
       <DesktopClone disabled={useDefaultLayout} width={760}>
-        <div className="flex min-h-dvh flex-col">
-          <Navbar desktopOnly={!useDefaultLayout} />
-          <main className="flex-1">{routes}</main>
-          <Footer desktopOnly={!useDefaultLayout} />
-        </div>
+        <main className="flex-1">{routes}</main>
       </DesktopClone>
+      <Footer />
       <CartDrawer />
       <SearchModal />
       <Toast />
