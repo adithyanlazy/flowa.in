@@ -264,3 +264,9 @@ create policy "admin update product photos" on storage.objects
 
 create policy "admin delete product photos" on storage.objects
   for delete using (bucket_id = 'product-photos' and public.is_admin(auth.uid()));
+
+-- ============================================================
+-- Admin can delete orders from the Orders tab (2026-07-06)
+-- ============================================================
+create policy "admin delete orders" on orders
+  for delete using (public.is_admin(auth.uid()));

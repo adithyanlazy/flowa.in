@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { PackageSearch } from 'lucide-react'
-import { fetchOrders, subscribeOrders } from '../../lib/orders.js'
+import { PackageSearch, Trash2 } from 'lucide-react'
+import { deleteOrder, fetchOrders, subscribeOrders } from '../../lib/orders.js'
 import { formatINR } from '../../data/products.js'
 
 function formatDate(iso) {
@@ -14,6 +14,9 @@ function formatDate(iso) {
 export default function OrdersTab() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [busyId, setBusyId] = useState(null)
+  const [actionError, setActionError] = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -23,7 +26,13 @@ export default function OrdersTab() {
         setLoading(false)
       }
     })
-    const unsubscribe = subscribeOrders((order) => {
+    const unsubscribe = subscribeOrders((payload) => {
+      if (payload.eventType === 'DELETE') {
+        setOrders((prev) => prev.filter((o) => o.id !== payload.old?.id))
+        return
+      }
+      const order = payload.new?.data
+      if (!order) return
       setOrders((prev) => (prev.some((o) => o.id === order.id) ? prev : [order, ...prev]))
     })
     return () => {
@@ -31,6 +40,19 @@ export default function OrdersTab() {
       unsubscribe()
     }
   }, [])
+
+  const handleDelete = async (id) => {
+    setBusyId(id)
+    setActionError('')
+    const { error } = await deleteOrder(id)
+    if (error) {
+      setActionError(error)
+    } else {
+      setOrders((prev) => prev.filter((o) => o.id !== id))
+    }
+    setConfirmDeleteId(null)
+    setBusyId(null)
+  }
 
   if (loading) {
     return <p className="text-sm text-plum-800/60">Loading orders…</p>
@@ -50,6 +72,7 @@ export default function OrdersTab() {
 
   return (
     <div className="space-y-3">
+      {actionError && <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{actionError}</p>}
       {orders.map((order) => (
         <div key={order.id} className="rounded-3xl bg-white p-5 shadow-soft">
           <div className="flex flex-wrap items-start justify-between gap-3 border-b border-blush-100 pb-3">
@@ -59,7 +82,38 @@ export default function OrdersTab() {
                 {formatDate(order.placedAt)} · {order.payment}
               </p>
             </div>
-            <p className="font-display text-xl text-plum-900">{formatINR(order.total)}</p>
+            <div className="flex items-center gap-3">
+              <p className="font-display text-xl text-plum-900">{formatINR(order.total)}</p>
+              {confirmDeleteId === order.id ? (
+                <>
+                  <span className="text-sm font-bold text-red-600">Delete?</span>
+                  <button
+                    onClick={() => handleDelete(order.id)}
+                    disabled={busyId === order.id}
+                    className="cursor-pointer rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700 disabled:cursor-wait disabled:opacity-70"
+                  >
+                    Yes, delete
+                  </button>
+                  <button
+                    onClick={() => setConfirmDeleteId(null)}
+                    disabled={busyId === order.id}
+                    className="cursor-pointer rounded-full bg-white px-4 py-2 text-sm font-bold text-plum-800 shadow-soft transition-colors hover:bg-blush-100"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setConfirmDeleteId(order.id)}
+                  disabled={busyId === order.id}
+                  aria-label={`Delete order ${order.id}`}
+                  title="Delete order"
+                  className="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-plum-800/50 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <Trash2 size={15} />
+                </button>
+              )}
+            </div>
           </div>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <div>

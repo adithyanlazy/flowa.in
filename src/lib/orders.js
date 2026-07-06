@@ -27,6 +27,24 @@ export async function recordOrder(order) {
   if (error) console.error('Flowa: failed to save order to Supabase', error)
 }
 
+// Admin-only: RLS only lets an admin caller's delete match a row (see "admin
+// delete" policy in scripts/supabase-schema.sql) — a non-admin's call matches
+// zero rows and comes back as error: null, so the caller can't tell success
+// from a silently-blocked no-op without this returning nothing to act on.
+export async function deleteOrder(id) {
+  if (!supabaseEnabled) {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(loadLocalOrders().filter((o) => o.id !== id)))
+    } catch {
+      // storage unavailable
+    }
+    return { error: null }
+  }
+  const { error } = await supabase.from('orders').delete().eq('id', id)
+  if (error) console.error('Flowa: failed to delete order', error)
+  return { error: error?.message || null }
+}
+
 export async function fetchOrders() {
   if (!supabaseEnabled) return loadLocalOrders()
   const { data, error } = await supabase.from('orders').select('data').order('created_at', { ascending: false })
@@ -37,15 +55,17 @@ export async function fetchOrders() {
   return data.map((row) => row.data)
 }
 
-// Subscribes to newly-inserted orders so an open Orders tab updates live.
-// Returns an unsubscribe function; no-op when Supabase isn't configured.
-export function subscribeOrders(onInsert) {
+// Subscribes to new + deleted orders so an open Orders tab updates live
+// (e.g. a delete from another admin's tab). Returns an unsubscribe function;
+// no-op when Supabase isn't configured. Callback receives the raw
+// postgres_changes payload — INSERT carries the full row in payload.new,
+// DELETE only carries the primary key in payload.old (id is that PK, so it's
+// always present even without REPLICA IDENTITY FULL).
+export function subscribeOrders(onChange) {
   if (!supabaseEnabled) return () => {}
   const channel = supabase
     .channel('orders_changes')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
-      if (payload.new?.data) onInsert(payload.new.data)
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, onChange)
     .subscribe()
   return () => supabase.removeChannel(channel)
 }
