@@ -35,7 +35,7 @@ export default function Checkout() {
   const [errors, setErrors] = useState({})
   const [placing, setPlacing] = useState(false)
 
-  const items = cart.map((i) => ({ ...i, product: getProduct(i.id) })).filter((i) => i.product)
+  const items = cart.map((i) => ({ ...i, product: i.kit || getProduct(i.id) })).filter((i) => i.product)
   const subtotal = items.reduce((s, i) => s + i.product.price * i.qty, 0)
   const savings = items.reduce((s, i) => s + Math.max(0, i.product.mrp - i.product.price) * i.qty, 0)
 
@@ -75,7 +75,7 @@ export default function Checkout() {
     setTimeout(() => {
       const order = {
         id: 'FLW' + Date.now().toString().slice(-8),
-        items: items.map((i) => ({ id: i.id, qty: i.qty, name: i.product.name, price: i.product.price })),
+        items: items.map((i) => ({ id: i.id, qty: i.qty, name: i.product.name, price: i.product.price, contents: i.product.contents })),
         total: subtotal,
         savings,
         customer: { ...form },

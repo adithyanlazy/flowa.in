@@ -67,9 +67,14 @@ export default function OrderSuccess() {
         </div>
         <ul className="mt-4 space-y-2 text-sm">
           {lastOrder.items.map((i) => (
-            <li key={i.id} className="flex justify-between text-plum-800/80">
-              <span>{i.name} × {i.qty}</span>
-              <span className="font-bold text-plum-900">{formatINR(i.price * i.qty)}</span>
+            <li key={i.id}>
+              <div className="flex justify-between text-plum-800/80">
+                <span>{i.name} × {i.qty}</span>
+                <span className="font-bold text-plum-900">{formatINR(i.price * i.qty)}</span>
+              </div>
+              {i.contents?.length > 0 && (
+                <p className="mt-0.5 text-xs text-plum-800/50">{i.contents.join(', ')}</p>
+              )}
             </li>
           ))}
         </ul>

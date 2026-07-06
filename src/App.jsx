@@ -9,6 +9,7 @@ import Toast from './components/Toast.jsx'
 import WhatsAppButton from './components/WhatsAppButton.jsx'
 import Home from './pages/Home.jsx'
 import Shop from './pages/Shop.jsx'
+import CustomizeKit from './pages/CustomizeKit.jsx'
 import ProductDetail from './pages/ProductDetail.jsx'
 import Wishlist from './pages/Wishlist.jsx'
 import Checkout from './pages/Checkout.jsx'
@@ -34,6 +35,7 @@ export default function App() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/customize" element={<CustomizeKit />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/checkout" element={<Checkout />} />

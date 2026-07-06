@@ -25,6 +25,9 @@ function cartReducer(state, action) {
       return state.map((i) => (i.id === action.id ? { ...i, qty: Math.min(action.qty, 10) } : i))
     case 'remove':
       return state.filter((i) => i.id !== action.id)
+    case 'addKit':
+      // custom kits are one-off — never merged with an existing line, each build is its own entry
+      return [...state, { id: action.kit.id, qty: 1, kit: action.kit }]
     case 'clear':
       return []
     default:
@@ -74,6 +77,11 @@ export function StoreProvider({ children }) {
     if (open) setCartOpen(true)
   }
 
+  const addCustomKit = (kit, { open = true } = {}) => {
+    dispatch({ type: 'addKit', kit })
+    if (open) setCartOpen(true)
+  }
+
   const toggleWishlist = (id) => {
     setWishlist((w) => {
       const has = w.includes(id)
@@ -88,6 +96,7 @@ export function StoreProvider({ children }) {
     cart,
     dispatch,
     addToCart,
+    addCustomKit,
     cartCount,
     wishlist,
     toggleWishlist,

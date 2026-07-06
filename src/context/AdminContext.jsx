@@ -44,6 +44,7 @@ const defaultData = {
   faqs: baseFaqs,
   content: defaultSiteContent,
   theme: defaultTheme,
+  kitItems: [],
 }
 
 // Shallow-spreading `defaultData` over stored/remote data would let a stale
@@ -213,7 +214,7 @@ export function AdminProvider({ children }) {
     return () => clearTimeout(saveTimer.current)
   }, [data, loaded])
 
-  const { overrides, customProducts, hiddenIds, order, reviews, faqs, content, theme } = data
+  const { overrides, customProducts, hiddenIds, order, reviews, faqs, content, theme, kitItems } = data
 
   const products = useMemo(() => {
     const merged = baseProducts.map((p) => ({ ...p, ...overrides[p.id] }))
@@ -262,6 +263,18 @@ export function AdminProvider({ children }) {
       delete next[id]
       return { ...d, overrides: next }
     })
+
+  // Kit Builder: a separate, admin-managed catalog of pickable items for the
+  // "Customize your day" build-your-own-kit feature — intentionally kept out
+  // of `products`/`customProducts` so it never shows up in the shop catalog.
+  const addKitItem = (item) => {
+    const id = item.id || `kit-item-${Date.now()}`
+    setData((d) => ({ ...d, kitItems: [...d.kitItems, { ...item, id }] }))
+    return id
+  }
+  const updateKitItem = (id, patch) =>
+    setData((d) => ({ ...d, kitItems: d.kitItems.map((k) => (k.id === id ? { ...k, ...patch } : k)) }))
+  const deleteKitItem = (id) => setData((d) => ({ ...d, kitItems: d.kitItems.filter((k) => k.id !== id) }))
 
   const getProduct = (id) => products.find((p) => p.id === id)
 
@@ -335,6 +348,10 @@ export function AdminProvider({ children }) {
     hiddenIds,
     baseProducts,
     isCustom,
+    kitItems,
+    addKitItem,
+    updateKitItem,
+    deleteKitItem,
     setReviews,
     setFaqs,
     setSiteContent,

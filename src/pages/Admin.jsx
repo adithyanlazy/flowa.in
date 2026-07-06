@@ -12,6 +12,7 @@ import {
   Package,
   Palette,
   Settings,
+  Sparkles,
   Users,
 } from 'lucide-react'
 import PageWrap from '../components/PageWrap.jsx'
@@ -19,6 +20,7 @@ import { useAdmin } from '../context/AdminContext.jsx'
 import OrdersTab from '../components/admin/OrdersTab.jsx'
 import UsersTab from '../components/admin/UsersTab.jsx'
 import ProductsTab from '../components/admin/ProductsTab.jsx'
+import KitBuilderTab from '../components/admin/KitBuilderTab.jsx'
 import ReviewsTab from '../components/admin/ReviewsTab.jsx'
 import FaqsTab from '../components/admin/FaqsTab.jsx'
 import ContentTab from '../components/admin/ContentTab.jsx'
@@ -28,6 +30,7 @@ import DataTab from '../components/admin/DataTab.jsx'
 const tabs = [
   { id: 'orders', label: 'Orders', icon: ClipboardList },
   { id: 'products', label: 'Products', icon: Package },
+  { id: 'kitbuilder', label: 'Customize Your Day', icon: Sparkles },
   { id: 'users', label: 'Users', icon: Users },
   { id: 'reviews', label: 'Reviews', icon: MessageSquareQuote },
   { id: 'faqs', label: 'FAQs', icon: FileQuestion },
@@ -72,6 +75,7 @@ function AdminPanel() {
   const Active = {
     orders: OrdersTab,
     products: ProductsTab,
+    kitbuilder: KitBuilderTab,
     users: UsersTab,
     reviews: ReviewsTab,
     faqs: FaqsTab,

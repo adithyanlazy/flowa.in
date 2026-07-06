@@ -11,7 +11,7 @@ export default function CartDrawer() {
   const { getProduct } = useAdmin()
   const navigate = useNavigate()
 
-  const items = cart.map((i) => ({ ...i, product: getProduct(i.id) })).filter((i) => i.product)
+  const items = cart.map((i) => ({ ...i, product: i.kit || getProduct(i.id) })).filter((i) => i.product)
   const subtotal = items.reduce((s, i) => s + i.product.price * i.qty, 0)
   const savings = items.reduce((s, i) => s + Math.max(0, i.product.mrp - i.product.price) * i.qty, 0)
 
@@ -67,7 +67,7 @@ export default function CartDrawer() {
             ) : (
               <>
                 <ul className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
-                  {items.map(({ product, qty }) => (
+                  {items.map(({ product, qty, kit }) => (
                     <motion.li
                       key={product.id}
                       layout
@@ -76,18 +76,26 @@ export default function CartDrawer() {
                       exit={{ opacity: 0, x: 40 }}
                       className="flex gap-4 rounded-2xl bg-white p-3 shadow-soft"
                     >
-                      <Link to={`/product/${product.id}`} onClick={() => setCartOpen(false)}>
+                      {kit ? (
                         <ProductVisual product={product} className="h-20 w-20 shrink-0 rounded-xl" />
-                      </Link>
+                      ) : (
+                        <Link to={`/product/${product.id}`} onClick={() => setCartOpen(false)}>
+                          <ProductVisual product={product} className="h-20 w-20 shrink-0 rounded-xl" />
+                        </Link>
+                      )}
                       <div className="flex flex-1 flex-col">
                         <div className="flex items-start justify-between gap-2">
-                          <Link
-                            to={`/product/${product.id}`}
-                            onClick={() => setCartOpen(false)}
-                            className="font-display text-sm leading-tight text-plum-900 hover:text-blush-600"
-                          >
-                            {product.name}
-                          </Link>
+                          {kit ? (
+                            <span className="font-display text-sm leading-tight text-plum-900">{product.name}</span>
+                          ) : (
+                            <Link
+                              to={`/product/${product.id}`}
+                              onClick={() => setCartOpen(false)}
+                              className="font-display text-sm leading-tight text-plum-900 hover:text-blush-600"
+                            >
+                              {product.name}
+                            </Link>
+                          )}
                           <button
                             onClick={() => dispatch({ type: 'remove', id: product.id })}
                             aria-label={`Remove ${product.name}`}
@@ -96,6 +104,9 @@ export default function CartDrawer() {
                             <Trash2 size={16} />
                           </button>
                         </div>
+                        {kit && (
+                          <p className="mt-0.5 line-clamp-2 text-xs text-plum-800/50">{product.contents.join(', ')}</p>
+                        )}
                         <div className="mt-auto flex items-center justify-between pt-2">
                           <div className="flex items-center gap-2 rounded-full bg-blush-50 px-1 py-1">
                             <button

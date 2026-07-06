@@ -11,6 +11,7 @@ import {
   MessageCircle,
   Package,
   ShieldCheck,
+  Sparkles,
   Truck,
 } from 'lucide-react'
 import PageWrap from '../components/PageWrap.jsx'
@@ -111,6 +112,14 @@ function Hero() {
                     {s.cta}
                     <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
                   </Link>
+                  <Link
+                    to="/customize"
+                    className="inline-flex items-center gap-2 rounded-full border-2 border-white/70 px-8 py-4 text-sm font-bold text-white backdrop-blur transition-colors duration-200 hover:bg-white/10"
+                  >
+                    <Sparkles size={16} /> Customize your day
+                  </Link>
+                </div>
+                <div className="mt-5 flex flex-wrap items-center gap-4">
                   <div className="flex items-center gap-2 text-white/90">
                     <Stars rating={4.8} showValue />
                     <span className="text-xs">{content.reviewsBlurb}</span>

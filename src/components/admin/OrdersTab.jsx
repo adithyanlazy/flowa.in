@@ -131,11 +131,16 @@ export default function OrdersTab() {
               <p className="text-xs font-bold uppercase tracking-wide text-plum-800/50">Items</p>
               <ul className="mt-1 space-y-1 text-sm text-plum-800/70">
                 {order.items?.map((item) => (
-                  <li key={item.id} className="flex justify-between gap-3">
-                    <span>
-                      {item.name} × {item.qty}
-                    </span>
-                    <span>{formatINR(item.price * item.qty)}</span>
+                  <li key={item.id}>
+                    <div className="flex justify-between gap-3">
+                      <span>
+                        {item.name} × {item.qty}
+                      </span>
+                      <span>{formatINR(item.price * item.qty)}</span>
+                    </div>
+                    {item.contents?.length > 0 && (
+                      <p className="mt-0.5 text-xs italic text-plum-800/50">Contains: {item.contents.join(', ')}</p>
+                    )}
                   </li>
                 ))}
               </ul>
