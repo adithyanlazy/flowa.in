@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Heart, LayoutDashboard, LogOut, Menu, Search, ShoppingBag, X } from 'lucide-react'
+import { Heart, Instagram, LayoutDashboard, LogOut, Menu, Search, ShoppingBag, X } from 'lucide-react'
 import { useStore } from '../context/StoreContext.jsx'
 import { useAdmin } from '../context/AdminContext.jsx'
 import LogoMark from './LogoMark.jsx'
@@ -77,6 +77,17 @@ export default function Navbar() {
             >
               <Search size={20} />
             </button>
+            {content.instagramUrl && (
+              <a
+                href={content.instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Flowa on Instagram"
+                className="grid h-11 w-11 place-items-center rounded-full text-plum-800 transition-colors hover:bg-blush-100"
+              >
+                <Instagram size={20} />
+              </a>
+            )}
             <Link
               to="/wishlist"
               aria-label={`Wishlist, ${wishlist.length} items`}

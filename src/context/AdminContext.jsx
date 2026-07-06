@@ -15,6 +15,7 @@ export const defaultSiteContent = {
     'Chemical-free cotton pads, herbal cramp relief and a little chocolate — thoughtfully boxed, discreetly delivered, paid only when it reaches you.',
   trustBadge: 'Trusted by 50,000+ women across India',
   reviewsBlurb: 'from 200+ verified reviews',
+  instagramUrl: 'https://instagram.com',
   whatsappNumber: '919061064554',
   contactPhone: '+91 90610 64554',
   contactEmail: 'hello@flowa.in',

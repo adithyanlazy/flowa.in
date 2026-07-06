@@ -48,7 +48,7 @@ export default function Footer() {
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-blush-100/70">{content.footerTagline}</p>
             <div className="mt-5 flex gap-3">
               <a
-                href="https://instagram.com"
+                href={content.instagramUrl}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Flowa on Instagram"

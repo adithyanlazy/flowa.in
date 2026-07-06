@@ -13,6 +13,7 @@ const fields = [
   { key: 'heroSubtitle', label: 'Hero subtitle', type: 'textarea' },
   { key: 'trustBadge', label: 'Hero trust badge text', type: 'text' },
   { key: 'reviewsBlurb', label: 'Reviews blurb under stars', type: 'text' },
+  { key: 'instagramUrl', label: 'Instagram profile URL', type: 'text' },
   { key: 'finalCtaTitle', label: 'Bottom CTA headline', type: 'textarea' },
   { key: 'aboutTitle', label: 'Our Story: headline', type: 'textarea' },
   { key: 'aboutBody', label: 'Our Story: body text', type: 'textarea' },
