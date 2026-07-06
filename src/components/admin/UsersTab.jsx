@@ -61,7 +61,7 @@ export default function UsersTab() {
           <UsersIcon size={24} className="text-blush-500" />
         </span>
         <p className="mt-4 font-bold text-plum-900">No accounts yet</p>
-        <p className="mt-1 text-sm text-plum-800/60">People who sign up at /admin will show up here.</p>
+        <p className="mt-1 text-sm text-plum-800/60">People who sign up at /login will show up here.</p>
       </div>
     )
   }
@@ -69,7 +69,7 @@ export default function UsersTab() {
   return (
     <div className="space-y-3">
       <p className="text-sm text-plum-800/60">
-        Anyone can sign up at <span className="font-bold text-plum-900">/admin</span>, but they get no access until you make them
+        Anyone can sign up at <span className="font-bold text-plum-900">/login</span>, but they get no admin access until you make them
         admin here.
       </p>
       {actionError && <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">{actionError}</p>}
