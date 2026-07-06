@@ -270,3 +270,42 @@ create policy "admin delete product photos" on storage.objects
 -- ============================================================
 create policy "admin delete orders" on orders
   for delete using (public.is_admin(auth.uid()));
+
+-- ============================================================
+-- Protect the founder admin account from demotion/deletion (2026-07-06)
+-- ============================================================
+-- Hard-pins adithyadev2004.2@gmail.com as permanent admin at the DB level —
+-- prevent_last_admin_removal/deletion above only fire when this is the LAST
+-- admin; this blocks any other admin from demoting or deleting this specific
+-- account even while other admins exist. Enforced in the trigger (not just
+-- RLS) so it holds no matter which policy path the update/delete comes
+-- through. To lift it later, edit the email below and rerun, or act from the
+-- Supabase SQL editor directly (the trigger still fires there too — this is
+-- meant as a last-resort-only override, not a routine escape hatch).
+create or replace function public.prevent_protected_admin_change()
+returns trigger as $$
+begin
+  if old.email = 'adithyadev2004.2@gmail.com' then
+    if tg_op = 'DELETE' then
+      raise exception 'this account is protected and cannot be deleted';
+    end if;
+    if new.is_admin = false then
+      raise exception 'this account is protected and cannot be removed as admin';
+    end if;
+  end if;
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+drop trigger if exists prevent_protected_admin_update_trigger on profiles;
+create trigger prevent_protected_admin_update_trigger
+  before update on profiles
+  for each row execute function public.prevent_protected_admin_change();
+
+drop trigger if exists prevent_protected_admin_delete_trigger on profiles;
+create trigger prevent_protected_admin_delete_trigger
+  before delete on profiles
+  for each row execute function public.prevent_protected_admin_change();
