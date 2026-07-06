@@ -18,6 +18,7 @@ import Contact from './pages/Contact.jsx'
 import Faq from './pages/Faq.jsx'
 import Policy from './pages/Policy.jsx'
 import Admin from './pages/Admin.jsx'
+import Login from './pages/Login.jsx'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/faq" element={<Faq />} />
         <Route path="/policy/:type" element={<Policy />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/login" element={<Login />} />
         <Route path="*" element={<Home />} />
       </Routes>
     </AnimatePresence>

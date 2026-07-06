@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Heart, LogOut, Menu, Search, ShoppingBag, X } from 'lucide-react'
+import { Heart, LayoutDashboard, LogOut, Menu, Search, ShoppingBag, X } from 'lucide-react'
 import { useStore } from '../context/StoreContext.jsx'
 import { useAdmin } from '../context/AdminContext.jsx'
 import LogoMark from './LogoMark.jsx'
@@ -26,7 +26,7 @@ function Logo() {
 
 export default function Navbar() {
   const { cartCount, wishlist, setCartOpen, setSearchOpen } = useStore()
-  const { content, authed, userEmail, logout } = useAdmin()
+  const { content, isLoggedIn, isAdmin, userEmail, logout } = useAdmin()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -119,8 +119,16 @@ export default function Navbar() {
           </div>
 
           <div className="hidden items-center gap-2.5 md:flex">
-            {authed ? (
+            {isLoggedIn ? (
               <>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-1.5 rounded-full bg-blush-50 px-3.5 py-2 text-sm font-bold text-blush-600 transition-colors hover:bg-blush-100"
+                  >
+                    <LayoutDashboard size={15} /> Admin Panel
+                  </Link>
+                )}
                 <span className="flex items-center gap-2 text-sm font-bold text-plum-800">
                   <span className="grid h-8 w-8 place-items-center rounded-full bg-plum-900 text-xs text-white">
                     {userEmail?.[0]?.toUpperCase()}
@@ -137,13 +145,13 @@ export default function Navbar() {
             ) : (
               <>
                 <Link
-                  to="/admin"
+                  to="/login"
                   className="rounded-full px-4 py-2 text-sm font-bold text-plum-800 transition-colors hover:bg-blush-50 hover:text-blush-600"
                 >
                   Login
                 </Link>
                 <Link
-                  to="/admin?mode=signup"
+                  to="/login?mode=signup"
                   className="rounded-full bg-plum-900 px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-blush-600"
                 >
                   Sign Up
@@ -178,27 +186,38 @@ export default function Navbar() {
                 </li>
               ))}
               <li className="mt-2 border-t border-blush-100 pt-3">
-                {authed ? (
-                  <button
-                    onClick={() => {
-                      logout()
-                      setMobileOpen(false)
-                    }}
-                    className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-4 py-3 text-base font-bold text-plum-800"
-                  >
-                    <LogOut size={18} /> Log out ({userEmail})
-                  </button>
+                {isLoggedIn ? (
+                  <div className="flex flex-col gap-2">
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2 rounded-xl bg-blush-50 px-4 py-3 text-base font-bold text-blush-600"
+                      >
+                        <LayoutDashboard size={18} /> Admin Panel
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        logout()
+                        setMobileOpen(false)
+                      }}
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-4 py-3 text-base font-bold text-plum-800"
+                    >
+                      <LogOut size={18} /> Log out ({userEmail})
+                    </button>
+                  </div>
                 ) : (
                   <div className="flex gap-2">
                     <Link
-                      to="/admin"
+                      to="/login"
                       onClick={() => setMobileOpen(false)}
                       className="flex-1 rounded-xl px-4 py-3 text-center text-base font-bold text-plum-800 hover:bg-blush-50"
                     >
                       Login
                     </Link>
                     <Link
-                      to="/admin?mode=signup"
+                      to="/login?mode=signup"
                       onClick={() => setMobileOpen(false)}
                       className="flex-1 rounded-xl bg-plum-900 px-4 py-3 text-center text-base font-bold text-white"
                     >

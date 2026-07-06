@@ -305,8 +305,9 @@ export function AdminProvider({ children }) {
 
   const logout = () => supabase.auth.signOut()
 
-  const authed = Boolean(session) && isAdmin
-  const pendingApproval = Boolean(session) && !isAdmin
+  const isLoggedIn = Boolean(session)
+  const authed = isLoggedIn && isAdmin
+  const pendingApproval = isLoggedIn && !isAdmin
 
   const value = {
     products,
@@ -314,6 +315,8 @@ export function AdminProvider({ children }) {
     faqs,
     content,
     theme,
+    isLoggedIn,
+    isAdmin,
     authed,
     authLoading: resolvingAuth,
     pendingApproval,
