@@ -39,7 +39,7 @@ export default function Shop() {
         <p className="text-sm font-bold uppercase tracking-widest text-blush-500">The Flowa shop</p>
         <h1 className="mt-2 font-display text-4xl text-plum-900">Care for every kind of day</h1>
         <p className="mt-3 max-w-lg text-plum-800/70">
-          Every product ships free in a discreet box, with pay-on-delivery across India.
+          Every product ships free in a discreet box, with pay-on-delivery across Bangalore.
         </p>
       </div>
 

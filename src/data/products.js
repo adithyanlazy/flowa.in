@@ -252,7 +252,7 @@ export const faqs = [
   },
   {
     q: 'What payment options do you support?',
-    a: 'Right now we offer Cash on Delivery (COD) across India, with free delivery on every order. Online payments (UPI, cards) are launching soon.',
+    a: 'Right now we offer Cash on Delivery (COD) across Bangalore, with free delivery on every order. Online payments (UPI, cards) are launching soon.',
   },
   {
     q: 'How long does delivery take?',

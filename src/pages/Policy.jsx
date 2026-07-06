@@ -24,7 +24,7 @@ const policies = {
     title: 'Shipping Policy',
     sections: [
       ['Dispatch', 'Orders are packed discreetly and dispatched within 24 hours, Monday to Saturday.'],
-      ['Delivery time', 'Metro cities: 2–4 working days. Rest of India: 4–7 working days. Timelines may extend during sales or severe weather.'],
+      ['Delivery time', 'Within Bangalore: 2–4 working days. Timelines may extend during sales or severe weather.'],
       ['Charges', 'Delivery is free on every order — no minimums, no hidden fees.'],
       ['Tracking', 'You receive tracking updates over WhatsApp and SMS from dispatch to doorstep.'],
     ],

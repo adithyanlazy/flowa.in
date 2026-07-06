@@ -8,7 +8,7 @@ const ROW_ID = 'flowa'
 const LS_KEY = 'flowa-admin-state'
 
 export const defaultSiteContent = {
-  announcement: 'Free delivery on every order · Pay on Delivery available across India',
+  announcement: 'Free delivery on every order · Pay on Delivery available across Bangalore',
   heroTitlePrefix: 'Period care that feels like a ',
   heroTitleHighlight: 'warm hug',
   heroSubtitle:
