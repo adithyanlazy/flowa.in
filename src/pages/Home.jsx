@@ -204,13 +204,21 @@ function Featured() {
           <p className="text-sm font-bold uppercase tracking-widest text-blush-500">The collection</p>
           <h2 className="mt-2 font-display text-4xl text-plum-900">Kits women swear by</h2>
         </div>
-        <Link
-          to="/shop"
-          className="group inline-flex items-center gap-2 text-sm font-bold text-plum-900 hover:text-blush-600"
-        >
-          View all products
-          <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
-        </Link>
+        <div className="flex flex-wrap items-center gap-5">
+          <Link
+            to="/customize"
+            className="group inline-flex items-center gap-2 text-sm font-bold text-blush-600 hover:text-blush-700"
+          >
+            <Sparkles size={15} /> Build your own kit
+          </Link>
+          <Link
+            to="/shop"
+            className="group inline-flex items-center gap-2 text-sm font-bold text-plum-900 hover:text-blush-600"
+          >
+            View all products
+            <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+          </Link>
+        </div>
       </motion.div>
       <div className="-mx-6 flex gap-5 overflow-x-auto px-6 pb-2 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0 lg:pb-0">
         {featured.map((p, i) => (

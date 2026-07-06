@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { SlidersHorizontal } from 'lucide-react'
+import { SlidersHorizontal, Sparkles } from 'lucide-react'
 import PageWrap from '../components/PageWrap.jsx'
 import ProductCard from '../components/ProductCard.jsx'
 import { useAdmin } from '../context/AdminContext.jsx'
@@ -41,6 +41,12 @@ export default function Shop() {
         <p className="mt-3 max-w-lg text-plum-800/70">
           Every product ships free in a discreet box, with pay-on-delivery across Bangalore.
         </p>
+        <Link
+          to="/customize"
+          className="mt-5 inline-flex items-center gap-2 rounded-full border-2 border-blush-400 px-6 py-3 text-sm font-bold text-blush-600 transition-colors duration-200 hover:bg-blush-50"
+        >
+          <Sparkles size={16} /> Or build your own kit
+        </Link>
       </div>
 
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
