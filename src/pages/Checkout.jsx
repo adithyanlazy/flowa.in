@@ -7,6 +7,7 @@ import ProductVisual from '../components/ProductVisual.jsx'
 import { useStore } from '../context/StoreContext.jsx'
 import { useAdmin } from '../context/AdminContext.jsx'
 import { formatINR } from '../data/products.js'
+import { recordOrder } from '../lib/orders.js'
 
 const fields = [
   { id: 'name', label: 'Full name', type: 'text', autoComplete: 'name', span: 2, placeholder: 'Priya Sharma' },
@@ -82,6 +83,7 @@ export default function Checkout() {
         payment: 'Cash on Delivery',
       }
       setLastOrder(order)
+      recordOrder(order)
       dispatch({ type: 'clear' })
       navigate('/order-success')
     }, 1400)

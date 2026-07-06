@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Heart, Menu, Search, ShoppingBag, X } from 'lucide-react'
+import { Heart, LogOut, Menu, Search, ShoppingBag, X } from 'lucide-react'
 import { useStore } from '../context/StoreContext.jsx'
 import { useAdmin } from '../context/AdminContext.jsx'
 import LogoMark from './LogoMark.jsx'
@@ -26,7 +26,7 @@ function Logo() {
 
 export default function Navbar() {
   const { cartCount, wishlist, setCartOpen, setSearchOpen } = useStore()
-  const { content } = useAdmin()
+  const { content, authed, userEmail, logout } = useAdmin()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -117,6 +117,40 @@ export default function Navbar() {
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
+
+          <div className="hidden items-center gap-2.5 md:flex">
+            {authed ? (
+              <>
+                <span className="flex items-center gap-2 text-sm font-bold text-plum-800">
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-plum-900 text-xs text-white">
+                    {userEmail?.[0]?.toUpperCase()}
+                  </span>
+                  {userEmail}
+                </span>
+                <button
+                  onClick={logout}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold text-plum-800/60 transition-colors hover:bg-blush-50 hover:text-blush-600"
+                >
+                  <LogOut size={15} /> Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/admin"
+                  className="rounded-full px-4 py-2 text-sm font-bold text-plum-800 transition-colors hover:bg-blush-50 hover:text-blush-600"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/admin?mode=signup"
+                  className="rounded-full bg-plum-900 px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-blush-600"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
         </nav>
 
         <AnimatePresence>
@@ -143,6 +177,36 @@ export default function Navbar() {
                   </NavLink>
                 </li>
               ))}
+              <li className="mt-2 border-t border-blush-100 pt-3">
+                {authed ? (
+                  <button
+                    onClick={() => {
+                      logout()
+                      setMobileOpen(false)
+                    }}
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-4 py-3 text-base font-bold text-plum-800"
+                  >
+                    <LogOut size={18} /> Log out ({userEmail})
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Link
+                      to="/admin"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex-1 rounded-xl px-4 py-3 text-center text-base font-bold text-plum-800 hover:bg-blush-50"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/admin?mode=signup"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex-1 rounded-xl bg-plum-900 px-4 py-3 text-center text-base font-bold text-white"
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </li>
               <li className="pb-3" />
             </motion.ul>
           )}

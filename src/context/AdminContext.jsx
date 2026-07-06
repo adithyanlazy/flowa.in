@@ -6,7 +6,6 @@ const AdminContext = createContext(null)
 
 const ROW_ID = 'flowa'
 const LS_KEY = 'flowa-admin-state'
-const LS_AUTH_KEY = 'flowa-admin-auth'
 
 export const defaultSiteContent = {
   announcement: 'Free delivery on every order · Pay on Delivery available across India',
@@ -34,8 +33,6 @@ export const defaultTheme = {
   '--color-plum-900': '#831843',
   '--color-lav-500': '#8b5cf6',
 }
-
-const ADMIN_PASSCODE = 'flowa2026'
 
 const defaultData = {
   overrides: {},
@@ -75,21 +72,6 @@ function saveCache(data) {
     console.error('Flowa admin: failed to cache state locally', err)
   }
 }
-function loadAuth() {
-  try {
-    return localStorage.getItem(LS_AUTH_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-function saveAuth(v) {
-  try {
-    localStorage.setItem(LS_AUTH_KEY, v ? '1' : '0')
-  } catch {
-    // ignore
-  }
-}
-
 function applyTheme(theme) {
   const root = document.documentElement
   Object.entries(theme).forEach(([k, v]) => root.style.setProperty(k, v))
@@ -97,10 +79,74 @@ function applyTheme(theme) {
 
 export function AdminProvider({ children }) {
   const [data, setData] = useState(loadCache)
-  const [authed, setAuthed] = useState(loadAuth)
   const [loaded, setLoaded] = useState(!supabaseEnabled)
   const skipNextSync = useRef(false)
   const saveTimer = useRef(null)
+
+  // Real admin auth (Supabase Auth) — replaces the old client-side-only
+  // passcode, which anyone could read out of the bundled JS. Signing up
+  // alone grants no access: `profiles.is_admin` defaults false and is only
+  // flippable from the Supabase SQL editor (see scripts/supabase-schema.sql).
+  const [session, setSession] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  // Single "still figuring out auth" flag — only ever cleared once we've
+  // reached a final answer (no session, or session + is_admin resolved).
+  // Two separately-cleared flags here previously let a real admin's page
+  // refresh render a false "Access pending" frame: the session resolved
+  // (loading -> false) one tick before the is_admin fetch effect even
+  // started (its own loading -> true hadn't fired yet), so pendingApproval
+  // read as true for that frame.
+  const [resolvingAuth, setResolvingAuth] = useState(true)
+
+  useEffect(() => {
+    if (!supabaseEnabled) {
+      setResolvingAuth(false)
+      return
+    }
+    let cancelled = false
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled) return
+      setSession(session)
+      if (!session) setResolvingAuth(false) // no session → nothing left to resolve
+      // else: stays "resolving" until the is_admin effect below finishes
+    })
+    const { data: listener } = supabase.auth.onAuthStateChange((event, next) => {
+      setSession(next)
+      // Only re-enter "resolving" for a real sign-in/out transition — Supabase
+      // also fires this on silent background token refreshes (~hourly) with a
+      // new session object every time; treating those as "resolving" would
+      // briefly kick a signed-in admin back to the full-page spinner for no
+      // reason.
+      if (event === 'SIGNED_IN') setResolvingAuth(true)
+      else if (event === 'SIGNED_OUT') setResolvingAuth(false)
+    })
+    return () => {
+      cancelled = true
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!session) {
+      setIsAdmin(false)
+      return
+    }
+    let cancelled = false
+    supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', session.user.id)
+      .maybeSingle()
+      .then(({ data: row, error }) => {
+        if (!cancelled) {
+          setIsAdmin(!error && row?.is_admin === true)
+          setResolvingAuth(false)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [session])
 
   useEffect(() => applyTheme(data.theme), [data.theme])
 
@@ -165,8 +211,6 @@ export function AdminProvider({ children }) {
     }, 500)
     return () => clearTimeout(saveTimer.current)
   }, [data, loaded])
-
-  useEffect(() => saveAuth(authed), [authed])
 
   const { overrides, customProducts, hiddenIds, order, reviews, faqs, content, theme } = data
 
@@ -244,14 +288,25 @@ export function AdminProvider({ children }) {
     }))
   }
 
-  const login = (pass) => {
-    if (pass === ADMIN_PASSCODE) {
-      setAuthed(true)
-      return true
-    }
-    return false
+  const signIn = async (email, password) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    return error ? error.message : null
   }
-  const logout = () => setAuthed(false)
+
+  const signUp = async (email, password, fullName) => {
+    const { data: signUpData, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    })
+    if (error) return { error: error.message }
+    return { error: null, needsConfirmation: !signUpData.session }
+  }
+
+  const logout = () => supabase.auth.signOut()
+
+  const authed = Boolean(session) && isAdmin
+  const pendingApproval = Boolean(session) && !isAdmin
 
   const value = {
     products,
@@ -260,7 +315,12 @@ export function AdminProvider({ children }) {
     content,
     theme,
     authed,
-    login,
+    authLoading: resolvingAuth,
+    pendingApproval,
+    userEmail: session?.user?.email,
+    userId: session?.user?.id,
+    signIn,
+    signUp,
     logout,
     getProduct,
     updateProduct,
