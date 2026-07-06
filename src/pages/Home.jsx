@@ -34,7 +34,7 @@ const marqueeItems = [
   { icon: Leaf, text: 'Chemical-free cotton' },
   { icon: HandHeart, text: 'Pay on delivery' },
   { icon: ShieldCheck, text: 'Dermat tested' },
-  { icon: Heart, text: '50,000+ women trust Flowa' },
+  { icon: Heart, text: '1000+ women trust Flowa' },
 ]
 
 function Hero() {

@@ -13,14 +13,14 @@ export const defaultSiteContent = {
   heroTitleHighlight: 'warm hug',
   heroSubtitle:
     'Chemical-free cotton pads, herbal cramp relief and a little chocolate — thoughtfully boxed, discreetly delivered, paid only when it reaches you.',
-  trustBadge: 'Trusted by 50,000+ women across India',
+  trustBadge: 'Trusted by 1000+ women across Bangalore',
   reviewsBlurb: 'from 200+ verified reviews',
   instagramUrl: 'https://instagram.com',
   whatsappNumber: '919061064554',
   contactPhone: '+91 90610 64554',
   contactEmail: 'hello@flowa.in',
   footerTagline:
-    'Thoughtful period care, delivered with love. Chemical-free essentials and real cramp relief for 50,000+ women across India.',
+    'Thoughtful period care, delivered with love. Chemical-free essentials and real cramp relief for 1000+ women across Bangalore.',
   finalCtaTitle: 'Your next period deserves better. Let us take care of it.',
   aboutTitle: 'We started Flowa because period care in India felt like an afterthought',
   aboutBody:

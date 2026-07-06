@@ -23,7 +23,7 @@ const values = [
 ]
 
 const stats = [
-  { value: '50,000+', label: 'women served' },
+  { value: '1000+', label: 'women served' },
   { value: '4.8★', label: 'average rating' },
   { value: '24h', label: 'dispatch time' },
   { value: '0', label: 'harsh chemicals' },
