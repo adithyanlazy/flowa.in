@@ -210,3 +210,34 @@ $$ language plpgsql security definer set search_path = public;
 -- one — safe to re-run, only touches nulls)
 update profiles set full_name = (select raw_user_meta_data->>'full_name' from auth.users where auth.users.id = profiles.id)
 where full_name is null;
+
+-- ============================================================
+-- Real account deletion from Users tab (2026-07-06)
+-- ============================================================
+
+-- The Users tab can now permanently delete an account (via the `delete-user`
+-- edge function, which uses the service_role key to call auth.admin.deleteUser
+-- — deleting straight from the client isn't possible without exposing that
+-- key). Deleting a row from auth.users cascades to profiles (see `on delete
+-- cascade` above), but a DELETE never fires the existing
+-- prevent_last_admin_removal trigger (that's BEFORE UPDATE only) — so without
+-- this, deleting the sole admin's own auth.users row would bypass that guard
+-- entirely. The edge function already checks this before calling the admin
+-- API, but this trigger is the same DB-level backstop as the update case:
+-- holds even if a future code path deletes profiles directly.
+create or replace function public.prevent_last_admin_deletion()
+returns trigger as $$
+begin
+  if old.is_admin = true then
+    if (select count(*) from profiles where is_admin = true) <= 1 then
+      raise exception 'cannot delete the last remaining admin';
+    end if;
+  end if;
+  return old;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+drop trigger if exists prevent_last_admin_deletion_trigger on profiles;
+create trigger prevent_last_admin_deletion_trigger
+  before delete on profiles
+  for each row execute function public.prevent_last_admin_deletion();

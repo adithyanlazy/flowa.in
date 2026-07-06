@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ShieldCheck, ShieldOff, Users as UsersIcon } from 'lucide-react'
-import { fetchProfiles, setUserAdmin, subscribeProfiles } from '../../lib/profiles.js'
+import { ShieldCheck, ShieldOff, Trash2, Users as UsersIcon } from 'lucide-react'
+import { deleteUser, fetchProfiles, setUserAdmin, subscribeProfiles } from '../../lib/profiles.js'
 import { useAdmin } from '../../context/AdminContext.jsx'
 
 function formatDate(iso) {
@@ -17,6 +17,7 @@ export default function UsersTab() {
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState(null)
   const [actionError, setActionError] = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -26,7 +27,13 @@ export default function UsersTab() {
         setLoading(false)
       }
     })
-    const unsubscribe = subscribeProfiles((row) => {
+    const unsubscribe = subscribeProfiles((payload) => {
+      if (payload.eventType === 'DELETE') {
+        setProfiles((prev) => prev.filter((p) => p.id !== payload.old?.id))
+        return
+      }
+      const row = payload.new
+      if (!row) return
       setProfiles((prev) => {
         const exists = prev.some((p) => p.id === row.id)
         return exists ? prev.map((p) => (p.id === row.id ? row : p)) : [...prev, row]
@@ -47,6 +54,19 @@ export default function UsersTab() {
     } else if (updated) {
       setProfiles((prev) => prev.map((p) => (p.id === profile.id ? updated : p)))
     }
+    setBusyId(null)
+  }
+
+  const handleDelete = async (profile) => {
+    setBusyId(profile.id)
+    setActionError('')
+    const { error } = await deleteUser(profile.id)
+    if (error) {
+      setActionError(error)
+    } else {
+      setProfiles((prev) => prev.filter((p) => p.id !== profile.id))
+    }
+    setConfirmDeleteId(null)
     setBusyId(null)
   }
 
@@ -93,14 +113,45 @@ export default function UsersTab() {
                 {p.is_admin ? <ShieldCheck size={13} /> : <ShieldOff size={13} />}
                 {p.is_admin ? 'Admin' : 'Member'}
               </span>
-              <button
-                onClick={() => toggleAdmin(p)}
-                disabled={isSelf || busyId === p.id}
-                title={isSelf ? "You can't change your own access" : undefined}
-                className="cursor-pointer rounded-full bg-plum-900 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blush-600 disabled:cursor-not-allowed disabled:bg-plum-900/20"
-              >
-                {p.is_admin ? 'Remove admin' : 'Make admin'}
-              </button>
+              {confirmDeleteId === p.id ? (
+                <>
+                  <span className="text-sm font-bold text-red-600">Delete permanently?</span>
+                  <button
+                    onClick={() => handleDelete(p)}
+                    disabled={busyId === p.id}
+                    className="cursor-pointer rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700 disabled:cursor-wait disabled:opacity-70"
+                  >
+                    Yes, delete
+                  </button>
+                  <button
+                    onClick={() => setConfirmDeleteId(null)}
+                    disabled={busyId === p.id}
+                    className="cursor-pointer rounded-full bg-white px-4 py-2 text-sm font-bold text-plum-800 shadow-soft transition-colors hover:bg-blush-100"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => toggleAdmin(p)}
+                    disabled={isSelf || busyId === p.id}
+                    title={isSelf ? "You can't change your own access" : undefined}
+                    className="cursor-pointer rounded-full bg-plum-900 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blush-600 disabled:cursor-not-allowed disabled:bg-plum-900/20"
+                  >
+                    {p.is_admin ? 'Remove admin' : 'Make admin'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDeleteId(p.id)}
+                    disabled={isSelf || busyId === p.id}
+                    title={isSelf ? "You can't delete your own account" : 'Delete account'}
+                    aria-label={`Delete ${p.email}`}
+                    className="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-plum-800/50 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )

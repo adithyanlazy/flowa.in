@@ -28,15 +28,27 @@ export async function setUserAdmin(id, isAdmin) {
   return { error: error?.message || null, profile: data }
 }
 
-// Subscribes to new signups and admin-flag changes so an open Users tab
-// updates live. Returns an unsubscribe function; no-op when Supabase isn't configured.
+// Permanently deletes an account via the `delete-user` edge function — the
+// service_role key needed for auth.admin.deleteUser can't live in the browser
+// bundle, so this hits a server-side function instead of Supabase directly.
+export async function deleteUser(id) {
+  if (!supabaseEnabled) return { error: 'Supabase not configured' }
+  const { data, error } = await supabase.functions.invoke('delete-user', { body: { userId: id } })
+  if (error) return { error: error.message }
+  if (data?.error) return { error: data.error }
+  return { error: null }
+}
+
+// Subscribes to new signups, admin-flag changes, and deletions so an open
+// Users tab updates live. Returns an unsubscribe function; no-op when
+// Supabase isn't configured. Callback receives the raw postgres_changes
+// payload so the caller can tell inserts/updates (payload.new) apart from
+// deletes (payload.eventType === 'DELETE', only payload.old is populated).
 export function subscribeProfiles(onChange) {
   if (!supabaseEnabled) return () => {}
   const channel = supabase
     .channel('profiles_changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
-      if (payload.new) onChange(payload.new)
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, onChange)
     .subscribe()
   return () => supabase.removeChannel(channel)
 }
