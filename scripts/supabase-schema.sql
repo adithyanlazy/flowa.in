@@ -241,3 +241,26 @@ drop trigger if exists prevent_last_admin_deletion_trigger on profiles;
 create trigger prevent_last_admin_deletion_trigger
   before delete on profiles
   for each row execute function public.prevent_last_admin_deletion();
+
+-- ============================================================
+-- Product photo uploads from device (2026-07-06)
+-- ============================================================
+
+-- Public-read bucket (product photos need to render for every visitor) but
+-- writes are admin-only, reusing the same public.is_admin() helper defined
+-- above so this doesn't hit the same policy-recursion issue those fixed.
+insert into storage.buckets (id, name, public)
+values ('product-photos', 'product-photos', true)
+on conflict (id) do nothing;
+
+create policy "public read product photos" on storage.objects
+  for select using (bucket_id = 'product-photos');
+
+create policy "admin upload product photos" on storage.objects
+  for insert with check (bucket_id = 'product-photos' and public.is_admin(auth.uid()));
+
+create policy "admin update product photos" on storage.objects
+  for update using (bucket_id = 'product-photos' and public.is_admin(auth.uid()));
+
+create policy "admin delete product photos" on storage.objects
+  for delete using (bucket_id = 'product-photos' and public.is_admin(auth.uid()));

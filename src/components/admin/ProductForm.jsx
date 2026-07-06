@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Save, X } from 'lucide-react'
+import { Save, X, Upload } from 'lucide-react'
+import { uploadProductPhoto } from '../../lib/storage.js'
+import { supabaseEnabled } from '../../lib/supabase.js'
 
 const artOptions = ['petal', 'wave', 'bloom', 'sun', 'leaf', 'drop', 'ribbon', 'spark']
 const stockOptions = [
@@ -21,6 +23,8 @@ function fromLines(text) {
 
 export default function ProductForm({ initial, categories = [], onSave, onCancel }) {
   const [addingCategory, setAddingCategory] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const [form, setForm] = useState(() => ({
     id: initial?.id || '',
     name: initial?.name || '',
@@ -43,6 +47,21 @@ export default function ProductForm({ initial, categories = [], onSave, onCancel
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
   const setPalette = (i, v) =>
     setForm((f) => ({ ...f, palette: f.palette.map((c, idx) => (idx === i ? v : c)) }))
+
+  const handlePhotoFile = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    setUploadError('')
+    const { url, error } = await uploadProductPhoto(file)
+    setUploading(false)
+    if (error) {
+      setUploadError(error)
+      return
+    }
+    set('photo', url)
+  }
 
   const submit = (e) => {
     e.preventDefault()
@@ -155,8 +174,41 @@ export default function ProductForm({ initial, categories = [], onSave, onCancel
       </div>
 
       <div>
-        <label className={labelClass}>Photo URL</label>
-        <input className={inputClass} value={form.photo} onChange={(e) => set('photo', e.target.value)} placeholder="/images/products/my-photo.jpg" />
+        <label className={labelClass}>Photo</label>
+        <div className="flex items-start gap-3">
+          {form.photo && (
+            <img src={form.photo} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+          )}
+          <div className="flex-1 space-y-2">
+            <input
+              className={inputClass}
+              value={form.photo}
+              onChange={(e) => set('photo', e.target.value)}
+              placeholder="/images/products/my-photo.jpg or https://..."
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <label
+                className={`inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-plum-800 shadow-soft transition-colors ${
+                  uploading || !supabaseEnabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-blush-100'
+                }`}
+              >
+                <Upload size={12} />
+                {uploading ? 'Uploading…' : 'Upload from device'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploading || !supabaseEnabled}
+                  onChange={handlePhotoFile}
+                />
+              </label>
+              {!supabaseEnabled && (
+                <span className="text-xs font-semibold text-plum-800/50">Connect Supabase to enable uploads</span>
+              )}
+              {uploadError && <span className="text-xs font-semibold text-red-600">{uploadError}</span>}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div>
