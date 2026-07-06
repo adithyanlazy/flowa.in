@@ -57,7 +57,7 @@ export default function ProductsTab() {
               <div className="flex flex-wrap items-center gap-4">
                 <div
                   className="h-16 w-16 shrink-0 rounded-2xl bg-cover bg-center"
-                  style={{ backgroundImage: p.photo ? `url(${p.photo})` : undefined, background: p.photo ? undefined : `linear-gradient(140deg, ${p.palette[0]}, ${p.palette[2]})` }}
+                  style={{ backgroundImage: p.photo ? `url(${p.photo})` : `linear-gradient(140deg, ${p.palette[0]}, ${p.palette[2]})` }}
                 />
                 <div className="min-w-[180px] flex-1">
                   <p className="font-display text-plum-900">{p.name}</p>
