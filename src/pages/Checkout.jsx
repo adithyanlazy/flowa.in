@@ -6,6 +6,7 @@ import PageWrap from '../components/PageWrap.jsx'
 import ProductVisual from '../components/ProductVisual.jsx'
 import { useStore } from '../context/StoreContext.jsx'
 import { useAdmin } from '../context/AdminContext.jsx'
+import { useRequireAuth } from '../hooks/useRequireAuth.js'
 import { formatINR } from '../data/products.js'
 import { recordOrder } from '../lib/orders.js'
 
@@ -29,7 +30,8 @@ function validate(form) {
 
 export default function Checkout() {
   const { cart, dispatch, setLastOrder } = useStore()
-  const { getProduct } = useAdmin()
+  const { getProduct, userId } = useAdmin()
+  const { isLoggedIn, authLoading } = useRequireAuth('/checkout')
   const navigate = useNavigate()
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', pincode: '', note: '' })
   const [errors, setErrors] = useState({})
@@ -38,6 +40,14 @@ export default function Checkout() {
   const items = cart.map((i) => ({ ...i, product: i.kit || getProduct(i.id) })).filter((i) => i.product)
   const subtotal = items.reduce((s, i) => s + i.product.price * i.qty, 0)
   const savings = items.reduce((s, i) => s + Math.max(0, i.product.mrp - i.product.price) * i.qty, 0)
+
+  if (authLoading || !isLoggedIn) {
+    return (
+      <PageWrap className="mx-auto max-w-xl px-4 py-24 text-center">
+        <Loader2 size={28} className="mx-auto animate-spin text-blush-500" />
+      </PageWrap>
+    )
+  }
 
   if (items.length === 0 && !placing) {
     return (
@@ -83,9 +93,9 @@ export default function Checkout() {
         payment: 'Cash on Delivery',
       }
       setLastOrder(order)
-      recordOrder(order)
+      recordOrder(order, userId)
       dispatch({ type: 'clear' })
-      navigate('/order-success')
+      navigate(`/order-success/${order.id}`)
     }, 1400)
   }
 

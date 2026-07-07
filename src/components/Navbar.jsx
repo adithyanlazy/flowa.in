@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Heart, Instagram, LayoutDashboard, LogOut, Menu, Search, ShoppingBag, X } from 'lucide-react'
+import { ChevronDown, Heart, Instagram, LayoutDashboard, LogOut, Menu, Package, Search, ShoppingBag, X } from 'lucide-react'
 import { useStore } from '../context/StoreContext.jsx'
 import { useAdmin } from '../context/AdminContext.jsx'
 import LogoMark from './LogoMark.jsx'
@@ -29,6 +29,8 @@ export default function Navbar() {
   const { content, isLoggedIn, isAdmin, userEmail, logout } = useAdmin()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const accountRef = useRef(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -36,6 +38,15 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  useEffect(() => {
+    if (!accountOpen) return
+    const onClickOutside = (e) => {
+      if (accountRef.current && !accountRef.current.contains(e.target)) setAccountOpen(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [accountOpen])
 
   return (
     <>
@@ -131,28 +142,61 @@ export default function Navbar() {
 
           <div className="hidden items-center gap-2.5 md:flex">
             {isLoggedIn ? (
-              <>
-                {isAdmin && (
-                  <Link
-                    to="/admin"
-                    className="flex items-center gap-1.5 rounded-full bg-blush-50 px-3.5 py-2 text-sm font-bold text-blush-600 transition-colors hover:bg-blush-100"
-                  >
-                    <LayoutDashboard size={15} /> Admin Panel
-                  </Link>
-                )}
-                <span className="flex items-center gap-2 text-sm font-bold text-plum-800">
-                  <span className="grid h-8 w-8 place-items-center rounded-full bg-plum-900 text-xs text-white">
+              <div className="relative" ref={accountRef}>
+                <button
+                  onClick={() => setAccountOpen((v) => !v)}
+                  aria-label="Account menu"
+                  aria-expanded={accountOpen}
+                  className={`flex cursor-pointer items-center gap-2 rounded-full py-1 pl-1 pr-2.5 transition-colors ${
+                    accountOpen ? 'bg-blush-100' : 'hover:bg-blush-50'
+                  }`}
+                >
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-plum-900 text-xs font-bold text-white">
                     {userEmail?.[0]?.toUpperCase()}
                   </span>
-                  {userEmail}
-                </span>
-                <button
-                  onClick={logout}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-sm font-bold text-plum-800/60 transition-colors hover:bg-blush-50 hover:text-blush-600"
-                >
-                  <LogOut size={15} /> Log out
+                  <ChevronDown size={15} className={`text-plum-800/60 transition-transform duration-200 ${accountOpen ? 'rotate-180' : ''}`} />
                 </button>
-              </>
+
+                <AnimatePresence>
+                  {accountOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      className="absolute right-0 top-full mt-2 w-64 origin-top-right overflow-hidden rounded-2xl bg-white p-2 shadow-soft"
+                    >
+                      <p className="truncate px-3 pb-2 pt-1.5 text-xs font-semibold text-plum-800/50">{userEmail}</p>
+                      <Link
+                        to="/orders"
+                        onClick={() => setAccountOpen(false)}
+                        className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-bold text-plum-800 transition-colors hover:bg-blush-50 hover:text-blush-600"
+                      >
+                        <Package size={16} /> My Orders
+                      </Link>
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-bold text-blush-600 transition-colors hover:bg-blush-50"
+                        >
+                          <LayoutDashboard size={16} /> Admin Panel
+                        </Link>
+                      )}
+                      <div className="my-1.5 border-t border-blush-100" />
+                      <button
+                        onClick={() => {
+                          logout()
+                          setAccountOpen(false)
+                        }}
+                        className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-plum-800/60 transition-colors hover:bg-red-50 hover:text-red-600"
+                      >
+                        <LogOut size={16} /> Log out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ) : (
               <>
                 <Link
@@ -199,6 +243,19 @@ export default function Navbar() {
               <li className="mt-2 border-t border-blush-100 pt-3">
                 {isLoggedIn ? (
                   <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2.5 px-4 py-2">
+                      <span className="grid h-9 w-9 place-items-center rounded-full bg-plum-900 text-xs font-bold text-white">
+                        {userEmail?.[0]?.toUpperCase()}
+                      </span>
+                      <span className="truncate text-sm font-semibold text-plum-800/60">{userEmail}</span>
+                    </div>
+                    <Link
+                      to="/orders"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 rounded-xl px-4 py-3 text-base font-bold text-plum-800"
+                    >
+                      <Package size={18} /> My Orders
+                    </Link>
                     {isAdmin && (
                       <Link
                         to="/admin"
@@ -215,7 +272,7 @@ export default function Navbar() {
                       }}
                       className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-4 py-3 text-base font-bold text-plum-800"
                     >
-                      <LogOut size={18} /> Log out ({userEmail})
+                      <LogOut size={18} /> Log out
                     </button>
                   </div>
                 ) : (

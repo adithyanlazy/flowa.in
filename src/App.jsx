@@ -14,6 +14,8 @@ import ProductDetail from './pages/ProductDetail.jsx'
 import Wishlist from './pages/Wishlist.jsx'
 import Checkout from './pages/Checkout.jsx'
 import OrderSuccess from './pages/OrderSuccess.jsx'
+import Orders from './pages/Orders.jsx'
+import OrderDetail from './pages/OrderDetail.jsx'
 import About from './pages/About.jsx'
 import Contact from './pages/Contact.jsx'
 import Faq from './pages/Faq.jsx'
@@ -39,7 +41,9 @@ export default function App() {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/order-success" element={<OrderSuccess />} />
+        <Route path="/order-success/:id" element={<OrderSuccess />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/:id" element={<OrderDetail />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<Faq />} />

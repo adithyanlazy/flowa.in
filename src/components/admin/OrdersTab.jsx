@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { PackageSearch, Trash2 } from 'lucide-react'
-import { deleteOrder, fetchOrders, subscribeOrders } from '../../lib/orders.js'
+import { deleteOrder, fetchOrders, subscribeOrders, updateOrderStatus } from '../../lib/orders.js'
 import { formatINR } from '../../data/products.js'
+import { ALL_STATUSES, STATUS_BADGE_CLASSES, STATUS_LABELS } from '../../lib/orderStatus.js'
 
 function formatDate(iso) {
   try {
@@ -17,6 +18,7 @@ export default function OrdersTab() {
   const [busyId, setBusyId] = useState(null)
   const [actionError, setActionError] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [trackingDrafts, setTrackingDrafts] = useState({})
 
   useEffect(() => {
     let cancelled = false
@@ -31,15 +33,49 @@ export default function OrdersTab() {
         setOrders((prev) => prev.filter((o) => o.id !== payload.old?.id))
         return
       }
-      const order = payload.new?.data
+      const row = payload.new
+      const order = row?.data
       if (!order) return
-      setOrders((prev) => (prev.some((o) => o.id === order.id) ? prev : [order, ...prev]))
+      const merged = { ...order, status: row.status, tracking_number: row.tracking_number, tracking_url: row.tracking_url }
+      setOrders((prev) =>
+        prev.some((o) => o.id === merged.id) ? prev.map((o) => (o.id === merged.id ? merged : o)) : [merged, ...prev],
+      )
     })
     return () => {
       cancelled = true
       unsubscribe()
     }
   }, [])
+
+  const handleStatusChange = async (id, status) => {
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)))
+    const { error } = await updateOrderStatus(id, { status })
+    if (error) setActionError(error)
+  }
+
+  const setDraft = (order, patch) =>
+    setTrackingDrafts((d) => ({
+      ...d,
+      [order.id]: { number: order.tracking_number || '', url: order.tracking_url || '', ...d[order.id], ...patch },
+    }))
+
+  const handleSaveTracking = async (id) => {
+    const draft = trackingDrafts[id]
+    if (!draft) return
+    setBusyId(id)
+    const { error } = await updateOrderStatus(id, { tracking_number: draft.number || null, tracking_url: draft.url || null })
+    if (error) {
+      setActionError(error)
+    } else {
+      setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, tracking_number: draft.number, tracking_url: draft.url } : o)))
+      setTrackingDrafts((d) => {
+        const next = { ...d }
+        delete next[id]
+        return next
+      })
+    }
+    setBusyId(null)
+  }
 
   const handleDelete = async (id) => {
     setBusyId(id)
@@ -83,6 +119,19 @@ export default function OrdersTab() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <select
+                value={order.status || 'pending'}
+                onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                className={`cursor-pointer rounded-full border-0 px-3.5 py-1.5 text-xs font-bold outline-none ${
+                  STATUS_BADGE_CLASSES[order.status] || STATUS_BADGE_CLASSES.pending
+                }`}
+              >
+                {ALL_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {STATUS_LABELS[s]}
+                  </option>
+                ))}
+              </select>
               <p className="font-display text-xl text-plum-900">{formatINR(order.total)}</p>
               {confirmDeleteId === order.id ? (
                 <>
@@ -145,6 +194,33 @@ export default function OrdersTab() {
                 ))}
               </ul>
             </div>
+          </div>
+          <div className="mt-4 flex flex-wrap items-end gap-3 border-t border-blush-100 pt-4">
+            <div className="flex-1 min-w-[160px]">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-plum-800/50">Tracking number</label>
+              <input
+                type="text"
+                value={(trackingDrafts[order.id] ?? { number: order.tracking_number || '' }).number}
+                onChange={(e) => setDraft(order, { number: e.target.value })}
+                className="w-full rounded-xl border-2 border-blush-100 bg-cream px-3 py-2 text-sm text-plum-900 outline-none focus:border-blush-400"
+              />
+            </div>
+            <div className="flex-1 min-w-[160px]">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-plum-800/50">Tracking URL</label>
+              <input
+                type="text"
+                value={(trackingDrafts[order.id] ?? { url: order.tracking_url || '' }).url}
+                onChange={(e) => setDraft(order, { url: e.target.value })}
+                className="w-full rounded-xl border-2 border-blush-100 bg-cream px-3 py-2 text-sm text-plum-900 outline-none focus:border-blush-400"
+              />
+            </div>
+            <button
+              onClick={() => handleSaveTracking(order.id)}
+              disabled={busyId === order.id || !trackingDrafts[order.id]}
+              className="cursor-pointer rounded-full bg-plum-900 px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-blush-600 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Save
+            </button>
           </div>
         </div>
       ))}

@@ -309,3 +309,39 @@ drop trigger if exists prevent_protected_admin_delete_trigger on profiles;
 create trigger prevent_protected_admin_delete_trigger
   before delete on profiles
   for each row execute function public.prevent_protected_admin_change();
+
+-- ============================================================
+-- Customer order history + status/tracking (2026-07-08)
+-- ============================================================
+-- Checkout now requires login (see Checkout.jsx), so every order can be
+-- tied to its owner. Adds real columns instead of stuffing more into the
+-- `data` JSONB blob so RLS and admin filtering/updates can target them
+-- directly.
+alter table orders add column if not exists user_id uuid references auth.users(id) on delete set null;
+alter table orders add column if not exists status text not null default 'pending';
+alter table orders add column if not exists tracking_number text;
+alter table orders add column if not exists tracking_url text;
+
+alter table orders drop constraint if exists orders_status_check;
+alter table orders add constraint orders_status_check
+  check (status in ('pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled'));
+
+create index if not exists orders_user_id_idx on orders(user_id);
+
+-- Insert was previously public/anonymous (checkout didn't require login).
+-- Now that it does, tighten this so a caller can only insert a row tagged
+-- with their own uid — prevents spoofing another user's user_id via the
+-- raw REST API.
+drop policy if exists "public insert" on orders;
+create policy "user insert own orders" on orders
+  for insert with check (auth.uid() = user_id);
+
+-- Customers can read their own order history (admin read already exists
+-- above via public.is_admin()).
+create policy "users read own orders" on orders
+  for select using (auth.uid() = user_id);
+
+-- No update policy existed at all before this — admin Orders tab was
+-- delete-only. Lets admin set status/tracking_number/tracking_url.
+create policy "admin update orders" on orders
+  for update using (public.is_admin(auth.uid()));
