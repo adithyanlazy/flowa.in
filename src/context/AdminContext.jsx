@@ -7,12 +7,55 @@ const AdminContext = createContext(null)
 const ROW_ID = 'flowa'
 const LS_KEY = 'flowa-admin-state'
 
+// Hero slides moved off the old flat heroTitlePrefix/heroImage/etc fields (kept
+// below only so buildLegacyHeroSlides can migrate any already-stored data) into
+// this array so admins can add/reorder/remove up to 5 slides, each with its own
+// title, subtitle and background image or video.
+export const defaultHeroSlides = [
+  {
+    id: 'slide-1',
+    mediaType: 'image',
+    mediaSrc: '/images/hero.jpg',
+    titlePrefix: 'Period care that feels like a ',
+    titleHighlight: 'warm hug',
+    subtitle:
+      'Chemical-free cotton pads, herbal cramp relief and a little chocolate — thoughtfully boxed, discreetly delivered, paid only when it reaches you.',
+  },
+  {
+    id: 'slide-2',
+    mediaType: 'image',
+    mediaSrc: baseProducts[6]?.photo || baseProducts[1]?.photo || '/images/hero.jpg',
+    titlePrefix: 'Everything you need, ',
+    titleHighlight: 'in one pack.',
+    subtitle: 'Pads, patches and comfort essentials — delivered discreetly, right on time.',
+  },
+]
+
+function buildLegacyHeroSlides(rawContent) {
+  if (!rawContent || (!rawContent.heroTitlePrefix && !rawContent.heroImage && !rawContent.heroImage2)) return null
+  return [
+    {
+      id: 'slide-1',
+      mediaType: 'image',
+      mediaSrc: rawContent.heroImage || defaultHeroSlides[0].mediaSrc,
+      titlePrefix: rawContent.heroTitlePrefix ?? defaultHeroSlides[0].titlePrefix,
+      titleHighlight: rawContent.heroTitleHighlight ?? defaultHeroSlides[0].titleHighlight,
+      subtitle: rawContent.heroSubtitle ?? defaultHeroSlides[0].subtitle,
+    },
+    {
+      id: 'slide-2',
+      mediaType: 'image',
+      mediaSrc: rawContent.heroImage2 || defaultHeroSlides[1].mediaSrc,
+      titlePrefix: defaultHeroSlides[1].titlePrefix,
+      titleHighlight: defaultHeroSlides[1].titleHighlight,
+      subtitle: defaultHeroSlides[1].subtitle,
+    },
+  ]
+}
+
 export const defaultSiteContent = {
   announcement: 'Free delivery on every order · Pay on Delivery available across Bangalore',
-  heroTitlePrefix: 'Period care that feels like a ',
-  heroTitleHighlight: 'warm hug',
-  heroSubtitle:
-    'Chemical-free cotton pads, herbal cramp relief and a little chocolate — thoughtfully boxed, discreetly delivered, paid only when it reaches you.',
+  heroSlides: defaultHeroSlides,
   trustBadge: 'Trusted by 1000+ women across Bangalore',
   reviewsBlurb: 'from 200+ verified reviews',
   instagramUrl: 'https://instagram.com',
@@ -25,8 +68,6 @@ export const defaultSiteContent = {
   aboutTitle: 'We started Flowa because period care in India felt like an afterthought',
   aboutBody:
     'Scratchy pads wrapped in newspaper. Cramps dismissed as drama. Chemists who hand you a black plastic bag like you are buying something shameful. We thought: what if a period box felt like a gift from someone who truly gets it? So we built one — soft, honest, chemical-free, and delivered with zero judgment.',
-  heroImage: '/images/hero.jpg',
-  heroImage2: baseProducts[6]?.photo || baseProducts[1]?.photo || '/images/hero.jpg',
 }
 
 export const defaultTheme = {
@@ -51,10 +92,15 @@ const defaultData = {
 // `content`/`theme` object (cached before a new default key was added, e.g.
 // heroImage2) silently wipe that key out — deep-merge those two nested configs.
 function mergeStoredData(incoming) {
+  const incomingContent = incoming?.content || {}
+  const heroSlides =
+    Array.isArray(incomingContent.heroSlides) && incomingContent.heroSlides.length
+      ? incomingContent.heroSlides
+      : buildLegacyHeroSlides(incomingContent) || defaultHeroSlides
   return {
     ...defaultData,
     ...incoming,
-    content: { ...defaultSiteContent, ...(incoming?.content || {}) },
+    content: { ...defaultSiteContent, ...incomingContent, heroSlides },
     theme: { ...defaultTheme, ...(incoming?.theme || {}) },
   }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -41,35 +41,37 @@ const marqueeItems = [
 function Hero() {
   const { products, content } = useAdmin()
   const featured = products[0]
-  const second = products[6] || products[1] || products[products.length - 1]
-
-  const slides = [
-    {
-      image: content.heroImage,
-      titlePrefix: content.heroTitlePrefix,
-      titleHighlight: content.heroTitleHighlight,
-      subtitle: content.heroSubtitle,
-      cta: 'Shop the kits',
-      to: '/shop',
-    },
-    {
-      image: content.heroImage2 || second?.photo || content.heroImage,
-      titlePrefix: 'Everything you need, ',
-      titleHighlight: 'in one pack.',
-      subtitle: 'Pads, patches and comfort essentials — delivered discreetly, right on time.',
-      cta: 'Shop now',
-      to: '/shop',
-    },
-  ]
+  const slides = content.heroSlides?.length ? content.heroSlides : []
 
   const [active, setActive] = useState(0)
+  const scrollerRef = useRef(null)
+  const scrollRaf = useRef(null)
+  const pausedRef = useRef(false)
+
+  const scrollToIndex = (i) => {
+    const el = scrollerRef.current
+    if (!el) return
+    el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' })
+  }
+
+  const handleScroll = () => {
+    const el = scrollerRef.current
+    if (!el || scrollRaf.current) return
+    scrollRaf.current = requestAnimationFrame(() => {
+      scrollRaf.current = null
+      setActive(Math.round(el.scrollLeft / el.clientWidth))
+    })
+  }
 
   useEffect(() => {
-    const id = setInterval(() => setActive((s) => (s + 1) % slides.length), 6000)
+    if (slides.length <= 1) return
+    const id = setInterval(() => {
+      if (!pausedRef.current) scrollToIndex((active + 1) % slides.length)
+    }, 6000)
     return () => clearInterval(id)
-  }, [slides.length])
+  }, [active, slides.length])
 
-  if (!featured) return null
+  if (!featured || !slides.length) return null
 
   return (
     <section className="relative overflow-hidden">
@@ -81,57 +83,70 @@ function Hero() {
       </div>
 
       <div className="group/slider relative h-[560px] w-full overflow-hidden sm:h-[580px] lg:h-[640px]">
-        {slides.map((s, i) => (
-          <div
-            key={i}
-            aria-hidden={i !== active}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              i === active ? 'opacity-100' : 'pointer-events-none opacity-0'
-            }`}
-          >
-            <img src={s.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-r from-plum-900/80 via-plum-900/40 to-transparent" />
-            <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6">
-              <motion.div
-                key={i === active ? `active-${i}` : `inactive-${i}`}
-                initial={{ opacity: 0, y: 24 }}
-                animate={i === active ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.15 }}
-                className="max-w-xl py-6"
-              >
-                <h1 className="font-display text-4xl leading-[1.15] text-white sm:text-6xl">
-                  {s.titlePrefix}
-                  <span className="text-blush-300">{s.titleHighlight}</span>
-                </h1>
-                <p className="mt-4 max-w-md text-base leading-relaxed text-white/80 sm:mt-5 sm:text-lg">{s.subtitle}</p>
-                <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
-                  <Link
-                    to={s.to}
-                    className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-plum-900 shadow-lift transition-colors duration-200 hover:bg-blush-100 sm:px-8 sm:py-4"
-                  >
-                    {s.cta}
-                    <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
-                  </Link>
-                  <Link
-                    to="/customize"
-                    className="inline-flex items-center gap-2 rounded-full border-2 border-white/70 px-6 py-3 text-sm font-bold text-white backdrop-blur transition-colors duration-200 hover:bg-white/10 sm:px-8 sm:py-4"
-                  >
-                    <Sparkles size={16} /> Customize your day
-                  </Link>
-                </div>
-                <div className="mt-4 flex flex-wrap items-center gap-4 sm:mt-5">
-                  <div className="flex items-center gap-2 text-white/90">
-                    <Stars rating={4.8} showValue />
-                    <span className="text-xs">{content.reviewsBlurb}</span>
+        <div
+          ref={scrollerRef}
+          onScroll={handleScroll}
+          onTouchStart={() => (pausedRef.current = true)}
+          onTouchEnd={() => setTimeout(() => (pausedRef.current = false), 3000)}
+          className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth [&::-webkit-scrollbar]:hidden"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {slides.map((s, i) => (
+            <div key={s.id} className="relative h-full w-full flex-shrink-0 snap-center snap-always">
+              {s.mediaType === 'video' ? (
+                <video
+                  src={s.mediaSrc}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+              ) : (
+                <img src={s.mediaSrc} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-r from-plum-900/80 via-plum-900/40 to-transparent" />
+              <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={i === active ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.15 }}
+                  className="max-w-xl py-6"
+                >
+                  <h1 className="font-display text-4xl leading-[1.15] text-white sm:text-6xl">
+                    {s.titlePrefix}
+                    <span className="text-blush-300">{s.titleHighlight}</span>
+                  </h1>
+                  <p className="mt-4 max-w-md text-base leading-relaxed text-white/80 sm:mt-5 sm:text-lg">{s.subtitle}</p>
+                  <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
+                    <Link
+                      to="/shop"
+                      className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-plum-900 shadow-lift transition-colors duration-200 hover:bg-blush-100 sm:px-8 sm:py-4"
+                    >
+                      Shop the kits
+                      <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+                    </Link>
+                    <Link
+                      to="/customize"
+                      className="inline-flex items-center gap-2 rounded-full border-2 border-white/70 px-6 py-3 text-sm font-bold text-white backdrop-blur transition-colors duration-200 hover:bg-white/10 sm:px-8 sm:py-4"
+                    >
+                      <Sparkles size={16} /> Customize your day
+                    </Link>
                   </div>
-                </div>
-              </motion.div>
+                  <div className="mt-4 flex flex-wrap items-center gap-4 sm:mt-5">
+                    <div className="flex items-center gap-2 text-white/90">
+                      <Stars rating={4.8} showValue />
+                      <span className="text-xs">{content.reviewsBlurb}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         {/* persistent trust chip */}
-        <div className="absolute bottom-6 right-6 z-20 hidden items-center gap-2 rounded-2xl bg-white/95 px-4 py-3 shadow-lift sm:flex">
+        <div className="pointer-events-none absolute bottom-6 right-6 z-20 hidden items-center gap-2 rounded-2xl bg-white/95 px-4 py-3 shadow-lift sm:flex">
           <BadgeCheck size={18} className="text-emerald-500" />
           <div>
             <p className="text-xs font-bold text-plum-900">Rash-free promise</p>
@@ -139,38 +154,42 @@ function Hero() {
           </div>
         </div>
 
-        {/* arrows, revealed on hover */}
-        <button
-          type="button"
-          onClick={() => setActive((s) => (s - 1 + slides.length) % slides.length)}
-          aria-label="Previous slide"
-          className="absolute left-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/90 p-2.5 opacity-0 shadow-lift transition-opacity duration-300 group-hover/slider:opacity-100 sm:flex"
-        >
-          <ArrowRight size={18} className="rotate-180 text-plum-900" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setActive((s) => (s + 1) % slides.length)}
-          aria-label="Next slide"
-          className="absolute right-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/90 p-2.5 opacity-0 shadow-lift transition-opacity duration-300 group-hover/slider:opacity-100 sm:flex"
-        >
-          <ArrowRight size={18} className="text-plum-900" />
-        </button>
-
-        {/* dot navigation */}
-        <div className="absolute inset-x-0 bottom-6 z-20 flex justify-center gap-3">
-          {slides.map((_, i) => (
+        {slides.length > 1 && (
+          <>
+            {/* arrows, revealed on hover */}
             <button
-              key={i}
               type="button"
-              onClick={() => setActive(i)}
-              aria-label={`Go to slide ${i + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === active ? 'w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
-              }`}
-            />
-          ))}
-        </div>
+              onClick={() => scrollToIndex((active - 1 + slides.length) % slides.length)}
+              aria-label="Previous slide"
+              className="absolute left-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/90 p-2.5 opacity-0 shadow-lift transition-opacity duration-300 group-hover/slider:opacity-100 sm:flex"
+            >
+              <ArrowRight size={18} className="rotate-180 text-plum-900" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToIndex((active + 1) % slides.length)}
+              aria-label="Next slide"
+              className="absolute right-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/90 p-2.5 opacity-0 shadow-lift transition-opacity duration-300 group-hover/slider:opacity-100 sm:flex"
+            >
+              <ArrowRight size={18} className="text-plum-900" />
+            </button>
+
+            {/* dot navigation */}
+            <div className="absolute inset-x-0 bottom-6 z-20 flex justify-center gap-3">
+              {slides.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => scrollToIndex(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === active ? 'w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   )
