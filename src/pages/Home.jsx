@@ -80,7 +80,7 @@ function Hero() {
         </span>
       </div>
 
-      <div className="group/slider relative h-[440px] w-full overflow-hidden sm:h-[580px] lg:h-[640px]">
+      <div className="group/slider relative h-[560px] w-full overflow-hidden sm:h-[580px] lg:h-[640px]">
         {slides.map((s, i) => (
           <div
             key={i}
@@ -97,29 +97,29 @@ function Hero() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={i === active ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.15 }}
-                className="max-w-xl"
+                className="max-w-xl py-6"
               >
-                <h1 className="font-display text-5xl leading-[1.12] text-white sm:text-6xl">
+                <h1 className="font-display text-4xl leading-[1.15] text-white sm:text-6xl">
                   {s.titlePrefix}
                   <span className="text-blush-300">{s.titleHighlight}</span>
                 </h1>
-                <p className="mt-5 max-w-md text-lg leading-relaxed text-white/80">{s.subtitle}</p>
-                <div className="mt-8 flex flex-wrap items-center gap-4">
+                <p className="mt-4 max-w-md text-base leading-relaxed text-white/80 sm:mt-5 sm:text-lg">{s.subtitle}</p>
+                <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
                   <Link
                     to={s.to}
-                    className="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-bold text-plum-900 shadow-lift transition-colors duration-200 hover:bg-blush-100"
+                    className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-plum-900 shadow-lift transition-colors duration-200 hover:bg-blush-100 sm:px-8 sm:py-4"
                   >
                     {s.cta}
                     <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
                   </Link>
                   <Link
                     to="/customize"
-                    className="inline-flex items-center gap-2 rounded-full border-2 border-white/70 px-8 py-4 text-sm font-bold text-white backdrop-blur transition-colors duration-200 hover:bg-white/10"
+                    className="inline-flex items-center gap-2 rounded-full border-2 border-white/70 px-6 py-3 text-sm font-bold text-white backdrop-blur transition-colors duration-200 hover:bg-white/10 sm:px-8 sm:py-4"
                   >
                     <Sparkles size={16} /> Customize your day
                   </Link>
                 </div>
-                <div className="mt-5 flex flex-wrap items-center gap-4">
+                <div className="mt-4 flex flex-wrap items-center gap-4 sm:mt-5">
                   <div className="flex items-center gap-2 text-white/90">
                     <Stars rating={4.8} showValue />
                     <span className="text-xs">{content.reviewsBlurb}</span>
