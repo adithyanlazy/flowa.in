@@ -115,7 +115,13 @@ function loadCache() {
 }
 function saveCache(data) {
   try {
-    localStorage.setItem(LS_KEY, JSON.stringify(data))
+    const json = JSON.stringify(data)
+    // localStorage quota is ~5MB shared across the whole origin — if the state
+    // somehow gets that big again (e.g. inlined media), skip the cache quietly
+    // and let Supabase remain the source of truth instead of throwing on every
+    // state change.
+    if (json.length > 4_000_000) return
+    localStorage.setItem(LS_KEY, json)
   } catch (err) {
     console.error('Flowa admin: failed to cache state locally', err)
   }

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Image as ImageIcon, Plus, Save, Trash2, Upload, Video as VideoIcon } from 'lucide-react'
 import { defaultHeroSlides, useAdmin } from '../../context/AdminContext.jsx'
+import { uploadMedia } from '../../lib/storage.js'
 
 const inputClass =
   'w-full rounded-xl border-2 border-blush-100 bg-white px-3.5 py-2.5 text-sm text-plum-900 outline-none transition-colors focus:border-blush-400'
@@ -21,9 +22,10 @@ const fields = [
   { key: 'contactEmail', label: 'Contact email', type: 'text' },
 ]
 
-// localStorage caps out around 5-10MB per origin, shared across every admin key —
-// a raw multi-MB photo as base64 can single-handedly blow that budget and make
-// every *other* save silently fail too. Downscale + re-encode so it stays tiny.
+// Hero media is uploaded to Supabase Storage and only the public URL is kept
+// in site content. Never inline base64 into store_state: that row is fetched
+// by every visitor and cached in localStorage, and one embedded video already
+// blew it up to 18MB. Images still get downscaled first to save bandwidth.
 function compressImage(file, maxWidth = 1600, quality = 0.75) {
   return new Promise((resolve, reject) => {
     const img = new Image()
@@ -35,25 +37,17 @@ function compressImage(file, maxWidth = 1600, quality = 0.75) {
       canvas.height = Math.round(img.height * scale)
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
       URL.revokeObjectURL(url)
-      resolve(canvas.toDataURL('image/jpeg', quality))
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error('Could not encode image'))),
+        'image/jpeg',
+        quality,
+      )
     }
     img.onerror = () => {
       URL.revokeObjectURL(url)
       reject(new Error('Could not load image'))
     }
     img.src = url
-  })
-}
-
-// Videos can't be downscaled like images, so just cap the raw upload size —
-// large enough for a short muted background loop, small enough to not blow
-// the shared localStorage/Supabase row budget.
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = () => reject(new Error('Could not read file'))
-    reader.readAsDataURL(file)
   })
 }
 
@@ -67,36 +61,43 @@ function SlideEditor({ slide, index, canRemove, onChange, onRemove }) {
   const imageRef = useRef(null)
   const videoRef = useRef(null)
   const [error, setError] = useState('')
-  const [videoMode, setVideoMode] = useState(slide.mediaSrc?.startsWith('data:') ? 'upload' : 'url')
+  const [uploading, setUploading] = useState(false)
+  const [videoMode, setVideoMode] = useState('upload')
 
   const set = (patch) => onChange({ ...slide, ...patch })
 
   const handleImageFile = async (e) => {
     const file = e.target.files?.[0]
+    e.target.value = ''
     if (!file) return
     if (!file.type.startsWith('image/')) return setError('Please choose an image file')
-    if (file.size > 3 * 1024 * 1024) return setError('Image is too large — keep it under 3MB')
+    if (file.size > 8 * 1024 * 1024) return setError('Image is too large — keep it under 8MB')
     setError('')
+    setUploading(true)
     try {
-      set({ mediaType: 'image', mediaSrc: await compressImage(file) })
+      const blob = await compressImage(file)
+      const { url, error: uploadError } = await uploadMedia(blob, 'jpg')
+      if (uploadError) setError(uploadError)
+      else set({ mediaType: 'image', mediaSrc: url })
     } catch {
       setError('Could not process that image — try a different file')
     }
-    e.target.value = ''
+    setUploading(false)
   }
 
   const handleVideoFile = async (e) => {
     const file = e.target.files?.[0]
+    e.target.value = ''
     if (!file) return
     if (!file.type.startsWith('video/')) return setError('Please choose a video file')
-    if (file.size > 12 * 1024 * 1024) return setError('Video is too large — keep it under 12MB')
+    if (file.size > 25 * 1024 * 1024) return setError('Video is too large — keep it under 25MB')
     setError('')
-    try {
-      set({ mediaType: 'video', mediaSrc: await readFileAsDataUrl(file) })
-    } catch {
-      setError('Could not process that video — try a different file')
-    }
-    e.target.value = ''
+    setUploading(true)
+    const ext = file.name.includes('.') ? file.name.split('.').pop() : 'mp4'
+    const { url, error: uploadError } = await uploadMedia(file, ext)
+    if (uploadError) setError(uploadError)
+    else set({ mediaType: 'video', mediaSrc: url })
+    setUploading(false)
   }
 
   return (
@@ -140,9 +141,10 @@ function SlideEditor({ slide, index, canRemove, onChange, onRemove }) {
               <>
                 <button
                   onClick={() => videoRef.current?.click()}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-plum-900 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blush-600"
+                  disabled={uploading}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-plum-900 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blush-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Upload size={14} /> Upload video
+                  <Upload size={14} /> {uploading ? 'Uploading…' : 'Upload video'}
                 </button>
                 <input ref={videoRef} type="file" accept="video/*" onChange={handleVideoFile} className="hidden" />
               </>
@@ -162,9 +164,10 @@ function SlideEditor({ slide, index, canRemove, onChange, onRemove }) {
           <img src={slide.mediaSrc} alt="" className="h-24 w-32 rounded-2xl object-cover shadow-soft" />
           <button
             onClick={() => imageRef.current?.click()}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-plum-900 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blush-600"
+            disabled={uploading}
+            className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-plum-900 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blush-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Upload size={14} /> Upload image
+            <Upload size={14} /> {uploading ? 'Uploading…' : 'Upload image'}
           </button>
           <input ref={imageRef} type="file" accept="image/*" onChange={handleImageFile} className="hidden" />
         </div>
