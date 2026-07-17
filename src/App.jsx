@@ -25,7 +25,12 @@ import Login from './pages/Login.jsx'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
-  useEffect(() => window.scrollTo({ top: 0, behavior: 'instant' }), [pathname])
+  useEffect(() => {
+    // Braces matter: as of Chrome 149, scrollTo() returns a Promise (scroll
+    // promises spec) — implicitly returning it made React call it as the
+    // effect's cleanup on every navigation, crashing the whole tree.
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [pathname])
   return null
 }
 
